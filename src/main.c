@@ -1,3 +1,5 @@
+#include "header/mainwindow.h"
+
 #include <iup.h>
 #include <stdio.h>
 
@@ -10,9 +12,8 @@ int main()
 		return 1;
 	}
 
-	Ihandle* win = IupDialog(NULL);
-	IupSetAttribute(win,"SIZE","QUARTER");
-	IupShow(win);
+	//Create the main window
+	create_mainwindow();
 
 	//Mainloop and exit
 	IupMainLoop();
