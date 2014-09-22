@@ -2,15 +2,52 @@
 
 #include <iup.h>
 #include <stddef.h>
+#include <stdio.h> //pls remove
+
+//Keyboard shortcuts. Format: {shortcut, modifiers, callback}
+Keyboard keyboard[] = {
+	{iup_XkeyCtrl(K_O),NULL},
+	{iup_XkeyCtrl(iup_XkeyShift(K_O)),&test},
+	{iup_XkeyCtrl(K_W),NULL},
+	{iup_XkeyCtrl(iup_XkeyShift(K_W)),NULL},
+	{iup_XkeyCtrl(K_S),NULL},
+	{iup_XkeyCtrl(iup_XkeyShift(K_S)),NULL},
+	{NULL}
+};
+
+int test(Ihandle* self)
+{
+	Ihandle* dlg = IupMessageDlg();
+	IupSetAttribute(dlg,"VALUE","ich bin ein test");
+	IupPopup(dlg,IUP_CURRENT,IUP_CURRENT);
+	return IUP_DEFAULT;
+}
+
+Icallback k_any(Ihandle* ih, int c)
+{
+	int i;
+	for(i = 0; keyboard[i].key; i++)
+	{
+		if(c == keyboard[i].key)
+		{
+			if(keyboard[i].cb != NULL)	//TEMPORARY
+			{
+				return (Icallback)(keyboard[i].cb)();
+			}
+		}
+	}
+
+	return (Icallback)IUP_DEFAULT;
+}
 
 void create_mainwindow()
 {
 	Ihandle *menu, *win;
 
-	//Aray of menus. Format: {name, callback}
+	//Array of menus. Format: {name, callback}
 	MenuItem fmenu[] = {
 		{"&Open...\tCtrl+O",NULL},
-		{"Open &Folder...\tCtrl+Shift+O",NULL},
+		{"Open &Folder...\tCtrl+Shift+O",(Icallback)test},
 		{SEPARATOR},
 		{"&Close\tCtrl+W",NULL},
 		{"C&lose All\tCtrl+Shift+W",NULL},
@@ -32,6 +69,7 @@ void create_mainwindow()
 	win = IupDialog(NULL);
 	IupSetAttribute(win,"TITLE","Pic2MCMap - Picture to Minecraft map format converter");
 	IupSetAttributeHandle(win,"MENU",menu);
+	IupSetCallback(win,"K_ANY",k_any);
 	IupShow(win);
 }
 
@@ -49,8 +87,6 @@ Ihandle* create_submenu(const char* label, MenuItem* items)
 		{
 			Ihandle* e = IupItem(items[i].label,NULL);
 			IupSetCallback(e,"ACTION",items[i].cb);
-			//if(items[i].key)
-			//	IupSetAttribute(e,"KEY",items[i].key);
 			IupAppend(m,e);
 		}
 	}
