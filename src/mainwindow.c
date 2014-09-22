@@ -2,7 +2,6 @@
 
 #include <iup.h>
 #include <stddef.h>
-#include <stdio.h> //pls remove
 
 //Keyboard shortcuts. Format: {shortcut, modifiers, callback}
 Keyboard keyboard[] = {
