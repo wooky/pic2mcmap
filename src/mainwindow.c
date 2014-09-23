@@ -1,12 +1,13 @@
 #include "header/mainwindow.h"
+#include "header/readimage.h"
 
 #include <iup.h>
 #include <stddef.h>
 
 //Keyboard shortcuts. Format: {shortcut, modifiers, callback}
 Keyboard keyboard[] = {
-	{iup_XkeyCtrl(K_O),NULL},
-	{iup_XkeyCtrl(iup_XkeyShift(K_O)),&test},
+	{iup_XkeyCtrl(K_O),&open_image_file},
+	{iup_XkeyCtrl(K_I),&test},
 	{iup_XkeyCtrl(K_W),NULL},
 	{iup_XkeyCtrl(iup_XkeyShift(K_W)),NULL},
 	{iup_XkeyCtrl(K_S),NULL},
@@ -45,8 +46,8 @@ void create_mainwindow()
 
 	//Array of menus. Format: {name, callback}
 	MenuItem fmenu[] = {
-		{"&Open...\tCtrl+O",NULL},
-		{"Open &Folder...\tCtrl+Shift+O",(Icallback)test},
+		{"&Open...\tCtrl+O",(Icallback)open_image_file},
+		{"&Import Map...\tCtrl+I",(Icallback)test},
 		{SEPARATOR},
 		{"&Close\tCtrl+W",NULL},
 		{"C&lose All\tCtrl+Shift+W",NULL},

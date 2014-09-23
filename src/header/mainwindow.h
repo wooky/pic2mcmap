@@ -20,7 +20,8 @@ typedef struct {
 	FunctionCallback cb;
 } Keyboard;
 
-int test(Ihandle*);
+int test(Ihandle*); //pls remove
+int k_all(Ihandle*,int);
 void create_mainwindow();
 Ihandle* create_submenu(const char*, MenuItem*);
 
