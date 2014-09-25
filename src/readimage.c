@@ -19,6 +19,7 @@ int open_image_file(Ihandle* ih)
 
 	//Do we have one file, or more than that?
 	char* fnames = IupGetAttribute(dlg,"VALUE");
+	IupDestroy(dlg);
 	if(fnames == NULL)
 		return IUP_DEFAULT;
 
@@ -37,7 +38,11 @@ int open_image_file(Ihandle* ih)
 				if(folder == NULL)
 					out_of_memory(ih,memsize_p,paths);
 				memcpy(folder,fnames,i * sizeof(char));
-				folder[i] = '/';
+				#ifdef WIN32
+					folder[i] = '\\';
+				#else
+					folder[i] = '/';
+				#endif
 			} else {
 				//Allocate memory for the filename and array of filenames
 				int s = memsize_f + section * sizeof(char);
@@ -68,13 +73,17 @@ int open_image_file(Ihandle* ih)
 		nOfElements++;
 	}
 
+	//Display all the filenames
+	Ihandle* win = IupDialog(ih);
+	IupSetAttributes(win,"TITLE=\"Select pictures to add\", MINBOX=NO, MAXBOX=NO");
+
 	//TEST! Print out all the files
 	for(i = 0; i < nOfElements; i++)
 		printf("%s\n",paths[i]);
 
 	//Done - clean up
 	cleanup(memsize_p, paths);
-	IupDestroy(dlg);
+	IupDestroy(win);
 	return IUP_DEFAULT;
 }
 
