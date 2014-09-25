@@ -3,7 +3,7 @@
 
 #include <iup.h>
 
-#define SEPARATOR 1
+#define SEPARATOR (char*)1
 #define SHIFT 1
 #define CONTROL 2
 

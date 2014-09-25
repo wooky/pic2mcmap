@@ -35,7 +35,7 @@ int open_image_file(Ihandle* ih)
 				memsize_f = (i + 1) * sizeof(char);	//CAUTION! Not null-terminated because we don't need it to be so
 				folder = malloc(memsize_f);
 				if(folder == NULL)
-					out_of_memory(ih);
+					out_of_memory(ih,memsize_p,paths);
 				memcpy(folder,fnames,i * sizeof(char));
 				folder[i] = '/';
 			} else {
@@ -45,7 +45,7 @@ int open_image_file(Ihandle* ih)
 				memsize_p += sizeof(char**);
 				paths = realloc(paths, memsize_p);
 				if(t == NULL || paths == NULL)
-					out_of_memory(ih);
+					out_of_memory(ih,memsize_p,paths);
 
 				//Put the full path into the string and that into the array
 				memcpy(t, folder, memsize_f);
@@ -73,26 +73,31 @@ int open_image_file(Ihandle* ih)
 		printf("%s\n",paths[i]);
 
 	//Done - clean up
-	cleanup();
+	cleanup(memsize_p, paths);
 	IupDestroy(dlg);
 	return IUP_DEFAULT;
 }
 
-void out_of_memory(Ihandle* parent)
+void out_of_memory(Ihandle* parent, int memsize_p, char** paths)
 {
 	Ihandle* dlg = IupMessageDlg();
 	IupSetAttributes(dlg,"TITLE=\"Out of Memory\", VALUE=\"Fatal error while loading images: out of memory!\", DIALOGTYPE=ERROR");
 	IupSetAttributeHandle(dlg,"PARENTDIALOG",parent);
 	IupPopup(dlg,IUP_CURRENT,IUP_CURRENT);
 
-	cleanup();
+	cleanup(memsize_p, paths);
 	IupDestroy(dlg);
 	IupDestroy(parent);
 	IupClose();
 	exit(-1);
 }
 
-void cleanup()
+void cleanup(int memsize_p, char** paths)
 {
-
+	int i;
+	for(i = 0; memsize_p; i++, memsize_p -= sizeof(char**))
+	{
+		free(paths[i]);
+	}
+	free(paths);
 }

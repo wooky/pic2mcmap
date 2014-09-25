@@ -12,7 +12,7 @@ Keyboard keyboard[] = {
 	{iup_XkeyCtrl(iup_XkeyShift(K_W)),NULL},
 	{iup_XkeyCtrl(K_S),NULL},
 	{iup_XkeyCtrl(iup_XkeyShift(K_S)),NULL},
-	{NULL}
+	{(int)NULL}
 };
 
 int test(Ihandle* self)
