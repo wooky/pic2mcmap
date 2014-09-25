@@ -23,7 +23,7 @@ int open_image_file(Ihandle* ih)
 		return IUP_DEFAULT;
 
 	//Put all files into an array, should there be more than one file
-	int i, nOfElements = 0, section, memsize_f = 0;
+	int i, nOfElements = 0, section, memsize_f = 0, memsize_p = 0;
 	char *folder = NULL, **paths = NULL;
 	for(i = 0; fnames[i]; i++, section += sizeof(char))
 	{
@@ -42,7 +42,8 @@ int open_image_file(Ihandle* ih)
 				//Allocate memory for the filename and array of filenames
 				int s = memsize_f + section * sizeof(char);
 				char *t = malloc(s);
-				paths = realloc(paths, (paths ? sizeof(paths) : 0) + sizeof(char**));
+				memsize_p += sizeof(char**);
+				paths = realloc(paths, memsize_p);
 				if(t == NULL || paths == NULL)
 					out_of_memory(ih);
 
