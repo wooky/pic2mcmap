@@ -19,7 +19,6 @@ int open_image_file(Ihandle* ih)
 
 	//Do we have one file, or more than that?
 	char* fnames = IupGetAttribute(dlg,"VALUE");
-	IupDestroy(dlg);
 	if(fnames == NULL)
 		return IUP_DEFAULT;
 
@@ -84,6 +83,7 @@ int open_image_file(Ihandle* ih)
 	//Done - clean up
 	cleanup(memsize_p, paths);
 	IupDestroy(win);
+	IupDestroy(dlg);
 	return IUP_DEFAULT;
 }
 
