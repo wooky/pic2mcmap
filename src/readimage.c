@@ -1,6 +1,7 @@
 #include "header/readimage.h"
 
 #include <iup.h>
+#include <iupcontrols.h>
 #include <string.h>
 #include <stddef.h>
 #include <stdlib.h>
@@ -74,19 +75,23 @@ int open_image_file(Ihandle* ih)
 
 	//Display all the filenames
 	Ihandle* win = IupDialog(ih);
+	Ihandle* mat = IupMatrixList();
+	IupSetInt(mat,"COUNT",nOfElements);
+	IupSetAttribute(mat,"COLUMNORDER","VALUE1:VALUE2:VALUE3");
+
+	//Show the dialog
 	IupSetAttributes(win,"TITLE=\"Select pictures to add\", MINBOX=NO, MAXBOX=NO");
+	IupShow(win);
 
-	//TEST! Print out all the files
-	for(i = 0; i < nOfElements; i++)
-		printf("%s\n",paths[i]);
-
-	//Done - clean up
+	//Mainloop and clean up
+	IupMainLoop();
 	cleanup(memsize_p, paths);
 	IupDestroy(win);
 	IupDestroy(dlg);
 	return IUP_DEFAULT;
 }
 
+//I hope this will never ever actually happen, and might completely remove it in the future
 void out_of_memory(Ihandle* parent, int memsize_p, char** paths)
 {
 	Ihandle* dlg = IupMessageDlg();
