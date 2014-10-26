@@ -4,6 +4,8 @@
 #include <iup.h>
 #include <stddef.h>
 
+Ihandle* console;	//Logging console
+
 //Keyboard shortcuts. Format: {shortcut, callback}
 Keyboard keyboard[] = {
 	{iup_XkeyCtrl(K_O),&open_image_file},
@@ -15,6 +17,7 @@ Keyboard keyboard[] = {
 	{(int)NULL}
 };
 
+//temporary, pls remove
 int test(Ihandle* self)
 {
 	Ihandle* dlg = IupMessageDlg();
@@ -30,7 +33,7 @@ Icallback k_any(Ihandle* ih, int c)
 	{
 		if(c == keyboard[i].key)
 		{
-			if(keyboard[i].cb != NULL)	//TEMPORARY
+			if(keyboard[i].cb != NULL)	//TEMPORARY, all keyboard shortcuts will be mapped eventually
 			{
 				return (Icallback)(keyboard[i].cb)();
 			}
@@ -42,7 +45,7 @@ Icallback k_any(Ihandle* ih, int c)
 
 void create_mainwindow()
 {
-	Ihandle *menu, *win;
+	Ihandle *menu, *vbox, *win;
 
 	//Array of menus. Format: {name, callback}
 	MenuItem fmenu[] = {
@@ -71,9 +74,15 @@ void create_mainwindow()
 		NULL
 	);
 
+	//Create the container to put all the stuff into
+	console = IupText(NULL);
+	IupSetAttributes(console,"MULTILINE=YES, READONLY=YES, VISIBLELINES=5, EXPAND=HORIZONTAL, WORDWRAP=YES, FONT=\"Courier, 9\","
+			"APPENDNEWLINE=NO, VALUE=\"Welcome to Pic2MCMap! Select an image or map to open through the File menu.\n\"");
+	vbox = IupVbox(console,NULL);
+
 	//Create the window, put everything inside, and show it
-	win = IupDialog(NULL);
-	IupSetAttribute(win,"TITLE","Pic2MCMap - Picture to Minecraft map format converter");
+	win = IupDialog(vbox);
+	IupSetAttributes(win,"TITLE=\"Pic2MCMap - Picture to Minecraft map format converter\", MINSIZE=800x600");
 	IupSetAttributeHandle(win,"MENU",menu);
 	IupSetCallback(win,"K_ANY",k_any);
 	IupShow(win);
@@ -100,7 +109,7 @@ Ihandle* create_submenu(const char* label, MenuItem* items)
 	return IupSubmenu(label,m);
 }
 
-void log_console(char* msg)
+void log_console(const char* msg)
 {
-
+	IupSetAttribute(console,"APPEND",msg);
 }

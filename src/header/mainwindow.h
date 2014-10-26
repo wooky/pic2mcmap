@@ -24,6 +24,6 @@ int test(Ihandle*); //pls remove
 Icallback k_all(Ihandle*,int);
 void create_mainwindow();
 Ihandle* create_submenu(const char*, MenuItem*);
-void log_console(char*);
+void log_console(const char*);
 
 #endif /* MAINWINDOW_H_LEL */

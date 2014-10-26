@@ -2,11 +2,10 @@
 #include "header/mainwindow.h"
 
 #include <iup.h>
-#include <iupcontrols.h>
+#include <iupim.h>
 #include <string.h>
 #include <stddef.h>
 #include <stdlib.h>
-#include <stdio.h> //temp
 
 int open_image_file(Ihandle* ih)
 {
