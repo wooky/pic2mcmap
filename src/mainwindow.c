@@ -4,7 +4,7 @@
 #include <iup.h>
 #include <stddef.h>
 
-//Keyboard shortcuts. Format: {shortcut, modifiers, callback}
+//Keyboard shortcuts. Format: {shortcut, callback}
 Keyboard keyboard[] = {
 	{iup_XkeyCtrl(K_O),&open_image_file},
 	{iup_XkeyCtrl(K_I),&test},

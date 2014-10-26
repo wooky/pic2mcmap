@@ -4,8 +4,6 @@
 #include <iup.h>
 
 int open_image_file(Ihandle*);
-int open_image_folder(Ihandle*);
-void out_of_memory(Ihandle*,int,char**);
-void cleanup(int,char**);
+void parse_image_file(Ihandle*, char*);
 
 #endif /* READIMAGE_H_ */
