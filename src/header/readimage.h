@@ -4,6 +4,6 @@
 #include <iup.h>
 
 int open_image_file(Ihandle*);
-void parse_image_file(Ihandle*, char*);
+void parse_image_file(Ihandle*, const char*);
 
 #endif /* READIMAGE_H_ */

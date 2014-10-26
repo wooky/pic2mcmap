@@ -59,9 +59,15 @@ void create_mainwindow()
 		{NULL}
 	};
 
+	MenuItem ftools[] = {
+			{"&Options"},
+			{NULL}
+	};
+
 	//Create the menu
 	menu = IupMenu(
 		create_submenu("&File",fmenu),
+		create_submenu("&Tools",ftools),
 		NULL
 	);
 
@@ -92,4 +98,9 @@ Ihandle* create_submenu(const char* label, MenuItem* items)
 	}
 
 	return IupSubmenu(label,m);
+}
+
+void log_console(char* msg)
+{
+
 }

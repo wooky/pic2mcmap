@@ -1,4 +1,5 @@
 #include "header/readimage.h"
+#include "header/mainwindow.h"
 
 #include <iup.h>
 #include <iupcontrols.h>
@@ -60,7 +61,16 @@ int open_image_file(Ihandle* ih)
 	return IUP_DEFAULT;
 }
 
-void parse_image_file(Ihandle* ih, char* name)
+void parse_image_file(Ihandle* ih, const char* name)
 {
-	printf("%s\n",name);
+	char msg[1024];
+	sprintf(msg,"Opening file %s... ", name);
+	log_console(msg);
+	Ihandle* img = IupLoadImage(name);
+	if(img == NULL)
+	{
+		sprintf(msg, "FAIL: %s\n", IupGetGlobal("IUPIM_LASTERROR"));
+		log_console(msg);
+		return;
+	}
 }
