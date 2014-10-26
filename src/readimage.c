@@ -14,47 +14,46 @@ int open_image_file(Ihandle* ih)
 	IupSetAttributes(dlg,"EXTFILTER=\"Common Picture Files|*.bmp;*.gif;*.jpg;*.jpeg;*.png|All Files|*.*|\", MULTIPLEFILES=YES");
 	IupPopup(dlg,IUP_CURRENT,IUP_CURRENT);
 
-	//If we have at least one image, continue
+	//If the user didn't cancel out of the dialog, continue
 	if(IupGetInt(dlg,"STATUS") != 0)
 		return IUP_DEFAULT;
 
-	//Do we have one file, or more than that?
+	//If we have at least one file, continue
 	char* fnames = IupGetAttribute(dlg,"VALUE");
 	if(fnames == NULL)
 		return IUP_DEFAULT;
 
-	//Put all files into an array, should there be more than one file
-	int i, memsize_f = 0, nOfElements = 0, section = 0;
-	char temp[1024];
-	for(i = 0; fnames[i]; i++, section += sizeof(char))
+	//Get the folder and all the files selected in that folder (if more than one file is selected)
+	//WARNING! Heavy use of pointer arithmetic. Future me might get confused by this
+	char temp[1024] = "", *fnamesFill, *tempFill;
+	for(fnamesFill = fnames, tempFill = temp; *fnamesFill; fnamesFill++)
 	{
-		if(fnames[i] == '|')
+		if(*fnamesFill == '|')
 		{
+			//Replace the | with a null character for easier string copying
+			*fnamesFill = '\0';
+			strcpy(tempFill,fnames);
+
 			//Special case if this is the first string - that's our folder
-			if(temp[0] == NULL)
+			if(temp == tempFill)
 			{
-				memsize_f = i+1;
-				memcpy(temp,fnames,i * sizeof(char));
+				tempFill += fnamesFill - fnames + 1;
 				#ifdef WIN32
-					temp[i] = '\\';
+					*(tempFill - 1) = '\\';
 				#else
-					temp[i] = '/';
+					*(tempFill - 1) = '/';
 				#endif
 			} else {
-				//Put the full path into the string and that into the array
-				memcpy(temp + memsize_f, fnames + i - section + 1, (section - 1) * sizeof(char));
-				temp[i + section] = '\0';
+				//Parse the filename
 				parse_image_file(ih, temp);
-
-				nOfElements++;
 			}
 
-			section = 0;
+			fnames = fnamesFill + 1;
 		}
 	}
 
-	//If there's just one file, make it so
-	if(nOfElements == 0)
+	//If there's just one file, parse it
+	if(temp[0] == NULL)
 		parse_image_file(ih,fnames);
 
 	IupDestroy(dlg);
