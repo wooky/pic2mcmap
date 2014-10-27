@@ -2,9 +2,14 @@
 #include "header/readimage.h"
 
 #include <iup.h>
+#include <im_image.h>
+#include <iupim.h>
+
 #include <stddef.h>
+#include <stdio.h>
 
 Ihandle* console;	//Logging console
+Ihandle* list;		//List of images opened
 
 //Keyboard shortcuts. Format: {shortcut, callback}
 Keyboard keyboard[] = {
@@ -45,7 +50,7 @@ Icallback k_any(Ihandle* ih, int c)
 
 void create_mainwindow()
 {
-	Ihandle *menu, *vbox, *win;
+	Ihandle *menu, *sizer, *vbox, *win;
 
 	//Array of menus. Format: {name, callback}
 	MenuItem fmenu[] = {
@@ -76,9 +81,15 @@ void create_mainwindow()
 
 	//Create the container to put all the stuff into
 	console = IupText(NULL);
-	IupSetAttributes(console,"MULTILINE=YES, READONLY=YES, VISIBLELINES=5, EXPAND=HORIZONTAL, WORDWRAP=YES, FONT=\"Courier, 9\","
+	IupSetAttributes(console,"MULTILINE=YES, READONLY=YES, MINSIZE=x85, EXPAND=YES, WORDWRAP=YES, FONT=\"Courier, 9\","
 			"APPENDNEWLINE=NO, VALUE=\"Welcome to Pic2MCMap! Select an image or map to open through the File menu.\n\"");
-	vbox = IupVbox(console,NULL);
+
+	list = IupList(NULL);
+	IupSetAttributes(list, "EXPAND=VERTICAL, SHOWIMAGE=YES, MINSIZE=155x");
+
+	sizer = IupSplit(IupHbox(list,NULL), console);
+	IupSetAttributes(sizer, "ORIENTATION=HORIZONTAL, VALUE=1000");
+	vbox = IupVbox(sizer,NULL);
 
 	//Create the window, put everything inside, and show it
 	win = IupDialog(vbox);
@@ -112,4 +123,14 @@ Ihandle* create_submenu(const char* label, MenuItem* items)
 void log_console(const char* msg)
 {
 	IupSetAttribute(console,"APPEND",msg);
+}
+
+void add_image(imImage* addr)
+{
+	IupSetAttribute(list, "APPENDITEM", "");
+	int count = IupGetInt(list, "COUNT");
+	char id[10];
+	sprintf(id, "IMAGE%d", count);
+	Ihandle* img = IupImageFromImImage(addr);
+	IupSetAttributeHandle(list, id, img);
 }

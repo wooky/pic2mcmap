@@ -2,6 +2,8 @@
 #define MAINWINDOW_H_LEL
 
 #include <iup.h>
+#include <im.h>
+#include <im_image.h>
 
 #define SEPARATOR (char*)1
 #define SHIFT 1
@@ -25,5 +27,6 @@ Icallback k_all(Ihandle*,int);
 void create_mainwindow();
 Ihandle* create_submenu(const char*, MenuItem*);
 void log_console(const char*);
+void add_image(imImage*);
 
 #endif /* MAINWINDOW_H_LEL */

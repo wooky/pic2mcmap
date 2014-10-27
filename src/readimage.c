@@ -2,10 +2,18 @@
 #include "header/mainwindow.h"
 
 #include <iup.h>
-#include <iupim.h>
+
+#include <im.h>
+#include <im_image.h>
+#include <im_process_loc.h>
+
 #include <string.h>
 #include <stddef.h>
 #include <stdlib.h>
+#include <stdio.h>
+
+//Put these into the Options dialog, not hard-coded
+#define RESIZE_ORDER 0
 
 int open_image_file(Ihandle* ih)
 {
@@ -63,13 +71,20 @@ int open_image_file(Ihandle* ih)
 void parse_image_file(Ihandle* ih, const char* name)
 {
 	char msg[1024];
+	int err;
 	sprintf(msg,"Opening file %s... ", name);
 	log_console(msg);
-	Ihandle* img = IupLoadImage(name);
-	if(img == NULL)
+	imImage* img = imFileImageLoadBitmap(name, 0, &err);
+	if(err != IM_ERR_NONE)
 	{
-		sprintf(msg, "FAIL: %s\n", IupGetGlobal("IUPIM_LASTERROR"));
+		sprintf(msg, "FAIL: Error %d\n", err);
 		log_console(msg);
 		return;
 	}
+	log_console("\n");
+
+	imImage *temp = imImageClone(img);
+	imImageReshape(temp, 128, 128);
+	imProcessResize(img, temp, RESIZE_ORDER);
+	add_image(temp);
 }
