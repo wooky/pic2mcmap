@@ -11,6 +11,8 @@
 Ihandle* console;	//Logging console
 Ihandle* list;		//List of images opened
 
+imImage* images;
+
 //Keyboard shortcuts. Format: {shortcut, callback}
 Keyboard keyboard[] = {
 	{iup_XkeyCtrl(K_O),&open_image_file},
