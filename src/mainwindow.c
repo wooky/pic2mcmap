@@ -54,30 +54,31 @@ void create_mainwindow()
 {
 	Ihandle *menu, *sizer, *vbox, *win;
 
-	//Array of menus. Format: {name, callback}
-	MenuItem fmenu[] = {
-		{"&Open...\tCtrl+O",(Icallback)open_image_file},
-		{"&Import Map...\tCtrl+I",(Icallback)test},
-		{SEPARATOR},
-		{"&Close\tCtrl+W",NULL},
-		{"C&lose All\tCtrl+Shift+W",NULL},
-		{SEPARATOR},
-		{"&Export to Map...\tCtrl+S",NULL},
-		{"Export to &World...\tCtrl+Shift+S",NULL},
-		{SEPARATOR},
-		{"E&xit", (Icallback)IupExitLoop},
-		{NULL}
-	};
-
-	MenuItem ftools[] = {
-			{"&Options"},
-			{NULL}
-	};
-
 	//Create the menu
 	menu = IupMenu(
-		create_submenu("&File",fmenu),
-		create_submenu("&Tools",ftools),
+		create_submenu("&File",(MenuItem[]){
+			{"&Open...\tCtrl+O",(Icallback)open_image_file},
+			{"&Import Map...\tCtrl+I",(Icallback)test},
+			{SEPARATOR},
+			{"&Close\tCtrl+W",NULL},
+			{"C&lose All\tCtrl+Shift+W",NULL},
+			{SEPARATOR},
+			{"&Export to Map...\tCtrl+S",NULL},
+			{"Export to &World...\tCtrl+Shift+S",NULL},
+			{SEPARATOR},
+			{"E&xit", (Icallback)IupExitLoop},
+			{NULL}
+		}),
+		create_submenu("&Image",(MenuItem[]){
+			{NULL}
+		}),
+		create_submenu("&Map",(MenuItem[]){
+			{NULL}
+		}),
+		create_submenu("&Tools",(MenuItem[]){
+			{"&Options"},
+			{NULL}
+		}),
 		NULL
 	);
 
@@ -101,6 +102,8 @@ void create_mainwindow()
 	IupShow(win);
 }
 
+//Create a submenu
+//Pass the name of the menu and an array of MenuItems, the last of which must be {NULL}
 Ihandle* create_submenu(const char* label, MenuItem* items)
 {
 	Ihandle* m = IupMenu(NULL);
