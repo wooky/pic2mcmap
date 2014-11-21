@@ -1,5 +1,6 @@
 #include "header/mainwindow.h"
 #include "header/readimage.h"
+#include "header/linkedlist.h"
 
 #include <iup.h>
 #include <im_image.h>
@@ -11,7 +12,7 @@
 Ihandle* console;	//Logging console
 Ihandle* list;		//List of images opened
 
-imImage* images;
+LinkedList *images = NULL;	//Size can be accessed by IupGetInt(list,"COUNT")
 
 //Keyboard shortcuts. Format: {shortcut, callback}
 Keyboard keyboard[] = {
@@ -136,6 +137,6 @@ void add_image(imImage* addr)
 	int count = IupGetInt(list, "COUNT");
 	char id[10];
 	sprintf(id, "IMAGE%d", count);
-	Ihandle* img = IupImageFromImImage(addr);
-	IupSetAttributeHandle(list, id, img);
+	IupSetAttributeHandle(list, id, IupImageFromImImage(addr));
+	LL_insert(NULL, images, addr, LL_APPEND);
 }
