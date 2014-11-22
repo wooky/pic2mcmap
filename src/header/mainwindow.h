@@ -23,8 +23,10 @@ typedef struct {
 } Keyboard;
 
 int test(Ihandle*); //pls remove
-Icallback k_all(Ihandle*,int);
+Icallback k_all(Ihandle*, int);
+int render_image(Ihandle*, char*, int, int);
 void create_mainwindow();
+void cleanup();
 Ihandle* create_submenu(const char*, MenuItem*);
 void log_console(const char*);
 void add_image(imImage*);

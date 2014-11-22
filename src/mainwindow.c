@@ -11,6 +11,8 @@
 
 Ihandle* console;	//Logging console
 Ihandle* list;		//List of images opened
+Ihandle* preview;	//Previewed image
+Ihandle* imgmod;	//Modified image
 
 LinkedList *images = NULL;	//Size can be accessed by IupGetInt(list,"COUNT")
 
@@ -51,12 +53,32 @@ Icallback k_any(Ihandle* ih, int c)
 	return (Icallback)IUP_DEFAULT;
 }
 
+int render_image(Ihandle *ih, char *text, int item, int state)
+{
+	if(state == 1)
+	{
+		char buf[256];
+		sprintf(buf,"%d\n",item-1);
+		log_console(buf);
+
+		LinkedList *ll = LL_get(images, item-1);
+		if(ll == NULL || ll->contents == NULL)
+			return IUP_ERROR;
+		imImage* img = ll->contents;
+
+		if(preview != NULL)
+			IupDestroy(preview);
+
+		preview = IupLabel("blah");
+		IupSetAttributeHandle(preview, "IMAGE", IupImageFromImImage(img));
+	}
+	return IUP_DEFAULT;
+}
+
 void create_mainwindow()
 {
-	Ihandle *menu, *sizer, *vbox, *win;
-
 	//Create the menu
-	menu = IupMenu(
+	Ihandle* menu = IupMenu(
 		create_submenu("&File",(MenuItem[]){
 			{"&Open...\tCtrl+O",(Icallback)open_image_file},
 			{"&Import Map...\tCtrl+I",(Icallback)test},
@@ -96,11 +118,20 @@ void create_mainwindow()
 	//List of images
 	list = IupList(NULL);
 	IupSetAttributes(list, "EXPAND=VERTICAL, SHOWIMAGE=YES, MINSIZE=155x, VISIBLELINES=1");
+	IupSetCallback(list, "ACTION", (Icallback)render_image);
+
+	//Horizontal box to contain all but the console
+	Ihandle* hbox = IupHbox(
+		list,
+		IupScrollBox(preview),
+		IupScrollBox(imgmod),
+		NULL
+	);
 
 	//Divider to resize the console
-	sizer = IupSplit(IupHbox(list,NULL), console);
+	Ihandle* sizer = IupSplit(hbox, console);
 	IupSetAttributes(sizer, "ORIENTATION=HORIZONTAL, VALUE=1000");
-	vbox = IupVbox(sizer,NULL);
+	Ihandle* vbox = IupVbox(sizer,NULL);
 
 	//Create the window, put everything inside, and show it
 	win = IupDialog(vbox);
@@ -108,6 +139,13 @@ void create_mainwindow()
 	IupSetAttributeHandle(win,"MENU",menu);
 	IupSetCallback(win,"K_ANY",k_any);
 	IupShow(win);
+}
+
+//Clean up the program by deleting any variables saved in heap
+void cleanup()
+{
+	IupDestroy(win);
+	LL_purge(images);
 }
 
 //Create a submenu
@@ -145,5 +183,5 @@ void add_image(imImage* addr)
 	char id[10];
 	sprintf(id, "IMAGE%d", count);
 	IupSetAttributeHandle(list, id, IupImageFromImImage(addr));
-	LL_insert(NULL, images, addr, LL_APPEND);
+	LL_insert(&images, addr, LL_APPEND);
 }

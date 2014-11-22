@@ -15,8 +15,11 @@ int main()
 	//Create the main window
 	create_mainwindow();
 
-	//Mainloop and exit
+	//Mainloop
 	IupMainLoop();
+
+	//Clean up and exit
+	cleanup();
 	IupClose();
 	return 0;
 }
