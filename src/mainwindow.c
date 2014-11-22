@@ -80,17 +80,24 @@ void create_mainwindow()
 			{"&Options"},
 			{NULL}
 		}),
+		create_submenu("&Help",(MenuItem[]){
+			{"&Wiki\tF1"},
+			{"&About"},
+			{NULL}
+		}),
 		NULL
 	);
 
-	//Create the container to put all the stuff into
+	//Status console
 	console = IupText(NULL);
 	IupSetAttributes(console,"MULTILINE=YES, READONLY=YES, MINSIZE=x85, EXPAND=YES, WORDWRAP=YES, FONT=\"Courier, 9\","
 			"APPENDNEWLINE=NO, VALUE=\"Welcome to Pic2MCMap! Select an image or map to open through the File menu.\n\"");
 
+	//List of images
 	list = IupList(NULL);
-	IupSetAttributes(list, "EXPAND=VERTICAL, SHOWIMAGE=YES, MINSIZE=155x");
+	IupSetAttributes(list, "EXPAND=VERTICAL, SHOWIMAGE=YES, MINSIZE=155x, VISIBLELINES=1");
 
+	//Divider to resize the console
 	sizer = IupSplit(IupHbox(list,NULL), console);
 	IupSetAttributes(sizer, "ORIENTATION=HORIZONTAL, VALUE=1000");
 	vbox = IupVbox(sizer,NULL);
