@@ -1,6 +1,7 @@
 #include "header/mainwindow.h"
 #include "header/readimage.h"
 #include "header/linkedlist.h"
+#include "header/maputils.h"
 
 #include <iup.h>
 #include <im_image.h>

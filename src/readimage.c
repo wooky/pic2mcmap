@@ -74,7 +74,7 @@ void parse_image_file(Ihandle* ih, const char* name)
 	int err;
 	sprintf(msg,"Opening file %s... ", name);
 	log_console(msg);
-	imImage* img = imFileImageLoadBitmap(name, 0, &err);
+	imImage* img = imFileImageLoad(name, 0, &err);
 	if(err != IM_ERR_NONE)
 	{
 		sprintf(msg, "FAIL: Error %d\n", err);
