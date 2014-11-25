@@ -9,10 +9,11 @@
 #include <stddef.h>
 #include <stdio.h>
 
-Ihandle* console;	//Logging console
-Ihandle* list;		//List of images opened
-Ihandle* preview;	//Previewed image
-Ihandle* imgmod;	//Modified image
+Ihandle* console;		//Logging console
+Ihandle* list;			//List of images opened
+Ihandle* placeholder;	//This is needed for some reason
+Ihandle* preview;		//Previewed image
+Ihandle* imgmod;		//Modified image
 
 LinkedList *images = NULL;	//Size can be accessed by IupGetInt(list,"COUNT")
 
@@ -57,20 +58,17 @@ int render_image(Ihandle *ih, char *text, int item, int state)
 {
 	if(state == 1)
 	{
-		char buf[256];
-		sprintf(buf,"%d\n",item-1);
-		log_console(buf);
-
 		LinkedList *ll = LL_get(images, item-1);
 		if(ll == NULL || ll->contents == NULL)
 			return IUP_ERROR;
 		imImage* img = ll->contents;
 
-		if(preview != NULL)
-			IupDestroy(preview);
-
-		preview = IupLabel("blah");
+		char buf[16];
+		sprintf(buf,"%dx%d",img->width,img->height);
+		IupSetAttribute(preview, "RASTERSIZE", buf);
 		IupSetAttributeHandle(preview, "IMAGE", IupImageFromImImage(img));
+		IupRefresh(preview);
+
 	}
 	return IUP_DEFAULT;
 }
@@ -120,6 +118,13 @@ void create_mainwindow()
 	IupSetAttributes(list, "EXPAND=VERTICAL, SHOWIMAGE=YES, MINSIZE=155x, VISIBLELINES=1");
 	IupSetCallback(list, "ACTION", (Icallback)render_image);
 
+	//Image containers
+	placeholder = IupImage(1,1,0);	//This is needed for some reason
+	preview = IupLabel(NULL);
+	IupSetAttributeHandle(preview, "IMAGE", placeholder);
+	imgmod = IupLabel(NULL);
+	IupSetAttributeHandle(imgmod, "IMAGE", placeholder);
+
 	//Horizontal box to contain all but the console
 	Ihandle* hbox = IupHbox(
 		list,
@@ -144,6 +149,7 @@ void create_mainwindow()
 //Clean up the program by deleting any variables saved in heap
 void cleanup()
 {
+	IupDestroy(placeholder);
 	IupDestroy(win);
 	LL_purge(images);
 }
@@ -182,6 +188,7 @@ void add_image(imImage* addr)
 	int count = IupGetInt(list, "COUNT");
 	char id[10];
 	sprintf(id, "IMAGE%d", count);
-	IupSetAttributeHandle(list, id, IupImageFromImImage(addr));
+	imImage* thumbnail = get_image_thumbnail(addr);
+	IupSetAttributeHandle(list, id, IupImageFromImImage(thumbnail));
 	LL_insert(&images, addr, LL_APPEND);
 }

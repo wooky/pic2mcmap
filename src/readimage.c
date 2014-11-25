@@ -81,10 +81,15 @@ void parse_image_file(Ihandle* ih, const char* name)
 		log_console(msg);
 		return;
 	}
-	log_console("\n");
 
-	imImage *temp = imImageClone(img);
+	log_console("\n");
+	add_image(img);
+}
+
+imImage* get_image_thumbnail(imImage* orig)
+{
+	imImage *temp = imImageClone(orig);
 	imImageReshape(temp, 128, 128);
-	imProcessResize(img, temp, RESIZE_ORDER);
-	add_image(temp);
+	imProcessResize(orig, temp, RESIZE_ORDER);
+	return temp;
 }
