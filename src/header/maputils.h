@@ -1,13 +1,17 @@
 #ifndef SRC_HEADER_MAPUTILS_H_
 #define SRC_HEADER_MAPUTILS_H_
 
+#include <im.h>
+#include <im_image.h>
+
 #define TRANSPARENT -1
 
 //This is the palette used by the Minecraft maps
 //Retrieved from http://minecraft.gamepedia.com/Map_item_format#Map_colors
 //Converted into long values by using the equation
 //R*65536+G*256+B
-const long mcpalette[] = {
+#define PALETTE_SIZE 144
+const long mcpalette[PALETTE_SIZE] = {
 		TRANSPARENT, TRANSPARENT, TRANSPARENT, TRANSPARENT,
 		5864743, 7182640, 8368696, 4415005,
 		11445363, 14010764, 16247203, 8551254,
@@ -45,5 +49,7 @@ const long mcpalette[] = {
 		921109, 1184026, 1381407, 723472,
 		5177600, 6291712, 7340544, 3866880
 };
+
+imImage* mapify(imImage*);
 
 #endif /* SRC_HEADER_MAPUTILS_H_ */

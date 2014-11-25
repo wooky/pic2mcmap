@@ -16,8 +16,8 @@ void throw_error(int i, int index)
 LinkedList* LL_get(LinkedList* head, int index)
 {
 	int i;
-	LinkedList *old_loc, *new_loc;
-	for(i = 0, old_loc = NULL, new_loc = head; i < index; i++, old_loc = new_loc, new_loc = new_loc->next)
+	LinkedList *new_loc;
+	for(i = 0, new_loc = head; i < index; i++, new_loc = new_loc->next)
 	{
 		//If the current location is NULL, we have gone too far, so throw an error
 		if(new_loc == NULL)

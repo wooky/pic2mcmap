@@ -69,6 +69,9 @@ int render_image(Ihandle *ih, char *text, int item, int state)
 		IupSetAttributeHandle(preview, "IMAGE", IupImageFromImImage(img));
 		IupRefresh(preview);
 
+		IupSetAttribute(imgmod, "RASTERSIZE", buf);
+		IupSetAttributeHandle(imgmod, "IMAGE", IupImageFromImImage(mapify(img)));
+		IupRefresh(imgmod);
 	}
 	return IUP_DEFAULT;
 }
