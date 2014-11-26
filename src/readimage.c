@@ -15,6 +15,17 @@
 //Put these into the Options dialog, not hard-coded
 #define RESIZE_ORDER 0
 
+int closest128(int x)
+{
+	if(x <= 192)
+		return 128;
+	else
+	{
+		int y = x/128;
+		return y*128;
+	}
+}
+
 int open_image_file(Ihandle* ih)
 {
 	//Show the open file dialog
@@ -70,7 +81,7 @@ int open_image_file(Ihandle* ih)
 
 void parse_image_file(Ihandle* ih, const char* name)
 {
-	char msg[1024];
+	char msg[128];
 	int err;
 	sprintf(msg,"Opening file %s... ", name);
 	log_console(msg);
@@ -82,8 +93,18 @@ void parse_image_file(Ihandle* ih, const char* name)
 		return;
 	}
 
-	log_console("\n");
-	add_image(img);
+	if(img->width % 128 == 0 && img->height % 128 == 0)
+		add_image(img);
+	else
+	{
+		imImage *temp = imImageClone(img);
+		imImageReshape(temp, closest128(img->width), closest128(img->height));
+		imProcessResize(img, temp, RESIZE_ORDER);
+		imImageDestroy(img);
+		sprintf(msg, "Image resized to %dX%d\n", temp->width, temp->height);
+		log_console(msg);
+		add_image(temp);
+	}
 }
 
 imImage* get_image_thumbnail(imImage* orig)

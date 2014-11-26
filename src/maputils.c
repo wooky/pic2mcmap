@@ -84,12 +84,6 @@ imImage* mapify(imImage* orig)
 
 	int i;
 
-	/*/Get the closest color for each pixel
-	for(i = 0; i < newimg->width * newimg->height; i++)
-	{
-		newimg->data[0][i] = mcpalette[imPaletteFindNearest(mcpalette, PALETTE_SIZE, newimg->data[0][i])];
-	}*/
-
 	unsigned char* data = (unsigned char*)newimg->data[0];
 	int depth = newimg->depth;	//TODO: use this variable to account for alpha
 	int ppp = newimg->count;

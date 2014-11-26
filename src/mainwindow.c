@@ -5,6 +5,7 @@
 
 #include <iup.h>
 #include <im_image.h>
+#include <im_process_loc.h>
 #include <iupim.h>
 
 #include <stddef.h>
@@ -14,7 +15,7 @@ Ihandle* console;		//Logging console
 Ihandle* list;			//List of images opened
 Ihandle* placeholder;	//This is needed for some reason
 Ihandle* preview;		//Previewed image
-Ihandle* imgmod;		//Modified image
+Ihandle* imgmod = NULL;	//Modified image (grid)
 
 LinkedList *images = NULL;	//Size can be accessed by IupGetInt(list,"COUNT")
 
@@ -35,6 +36,7 @@ int test(Ihandle* self)
 	Ihandle* dlg = IupMessageDlg();
 	IupSetAttribute(dlg,"VALUE","ich bin ein test");
 	IupPopup(dlg,IUP_CURRENT,IUP_CURRENT);
+	IupDestroy(dlg);
 	return IUP_DEFAULT;
 }
 
@@ -64,14 +66,38 @@ int render_image(Ihandle *ih, char *text, int item, int state)
 			return IUP_ERROR;
 		imImage* img = ll->contents;
 
-		char buf[16];
+		//Display the scaled image
+		char buf[64];
 		sprintf(buf,"%dx%d",img->width,img->height);
 		IupSetAttribute(preview, "RASTERSIZE", buf);
 		IupSetAttributeHandle(preview, "IMAGE", IupImageFromImImage(img));
 		IupRefresh(preview);
 
-		IupSetAttribute(imgmod, "RASTERSIZE", buf);
-		IupSetAttributeHandle(imgmod, "IMAGE", IupImageFromImImage(mapify(img)));
+		//Recreate the grid where to put all the images
+		Ihandle* child;
+		while((child = IupGetChild(imgmod, 0)) != NULL)
+			IupDestroy(child);
+		int cols = img->width/128, rows = img->height/128;
+		IupSetInt(imgmod, "NUMDIV", cols);
+
+		//Put the images into the grid
+		int i,j;
+		for(i = rows-1; i >= 0; i--)
+		{
+			for(j = 0; j < cols; j++)
+			{
+				imImage* temp = imImageCreate(128, 128, img->color_space, img->data_type);
+				imProcessCrop(img, temp, j*128, i*128);
+				Ihandle* tinyimg = IupLabel(NULL);
+				IupSetAttributeHandle(tinyimg, "IMAGE", IupImageFromImImage(mapify(temp)));
+				if(IupAppend(imgmod, tinyimg) == NULL)
+				{
+					sprintf(buf, "Failed to attach image piece %d:%d\n", j, i);
+					log_console(buf);
+				}
+				IupMap(tinyimg);
+			}
+		}
 		IupRefresh(imgmod);
 	}
 	return IUP_DEFAULT;
@@ -126,14 +152,24 @@ void create_mainwindow()
 	placeholder = IupImage(1,1,0);	//This is needed for some reason
 	preview = IupLabel(NULL);
 	IupSetAttributeHandle(preview, "IMAGE", placeholder);
-	imgmod = IupLabel(NULL);
-	IupSetAttributeHandle(imgmod, "IMAGE", placeholder);
+	imgmod = IupGridBox(NULL);
+	IupSetAttributes(imgmod, "GAPLIN=5, GAPCOL=5");
 
 	//Horizontal box to contain all but the console
 	Ihandle* hbox = IupHbox(
 		list,
-		IupScrollBox(preview),
-		IupScrollBox(imgmod),
+		IupSplit(
+			IupVbox(
+					IupSetAttributes(IupLabel("Scaled Image"),"ALIGNMENT=ACENTER, EXPAND=HORIZONTAL"),
+					IupScrollBox(preview),
+					NULL
+			),
+			IupVbox(
+					IupSetAttributes(IupLabel("Resulting Map"),"ALIGNMENT=ACENTER, EXPAND=HORIZONTAL"),
+					IupScrollBox(imgmod),
+					NULL
+			)
+		),
 		NULL
 	);
 
