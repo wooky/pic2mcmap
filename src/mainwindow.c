@@ -15,7 +15,7 @@ Ihandle* console;		//Logging console
 Ihandle* list;			//List of images opened
 Ihandle* placeholder;	//This is needed for some reason
 Ihandle* preview;		//Previewed image
-Ihandle* imgmod = NULL;	//Modified image (grid)
+Ihandle* imgmod;		//Modified image (grid)
 
 LinkedList *images = NULL;	//Size can be accessed by IupGetInt(list,"COUNT")
 
@@ -70,33 +70,27 @@ int render_image(Ihandle *ih, char *text, int item, int state)
 		char buf[64];
 		sprintf(buf,"%dx%d",img->width,img->height);
 		IupSetAttribute(preview, "RASTERSIZE", buf);
-		IupSetAttributeHandle(preview, "IMAGE", IupImageFromImImage(img));
+		IupSetAttributeHandle(preview, "IMAGE", ll->iContents);
 		IupRefresh(preview);
 
 		//Recreate the grid where to put all the images
 		Ihandle* child;
 		while((child = IupGetChild(imgmod, 0)) != NULL)
 			IupDestroy(child);
-		int cols = img->width/128, rows = img->height/128;
-		IupSetInt(imgmod, "NUMDIV", cols);
+		IupSetInt(imgmod, "NUMDIV", ll->cols);
 
 		//Put the images into the grid
-		int i,j;
-		for(i = rows-1; i >= 0; i--)
+		int i;
+		for(i = 0; i < ll->cols * ll->rows; i++)
 		{
-			for(j = 0; j < cols; j++)
+			Ihandle* tinyimg = IupLabel(NULL);
+			IupSetAttributeHandle(tinyimg, "IMAGE", ll->iGrid[i]);
+			if(IupAppend(imgmod, tinyimg) == NULL)
 			{
-				imImage* temp = imImageCreate(128, 128, img->color_space, img->data_type);
-				imProcessCrop(img, temp, j*128, i*128);
-				Ihandle* tinyimg = IupLabel(NULL);
-				IupSetAttributeHandle(tinyimg, "IMAGE", IupImageFromImImage(mapify(temp)));
-				if(IupAppend(imgmod, tinyimg) == NULL)
-				{
-					sprintf(buf, "Failed to attach image piece %d:%d\n", j, i);
-					log_console(buf);
-				}
-				IupMap(tinyimg);
+				sprintf(buf, "Failed to attach image piece %d\n", i);
+				log_console(buf);
 			}
+			IupMap(tinyimg);
 		}
 		IupRefresh(imgmod);
 	}
@@ -224,11 +218,12 @@ void log_console(const char* msg)
 
 void add_image(imImage* addr)
 {
+	LinkedList* ll = LL_insert(&images, addr, LL_APPEND);
+
 	IupSetAttribute(list, "APPENDITEM", "");
 	int count = IupGetInt(list, "COUNT");
 	char id[10];
 	sprintf(id, "IMAGE%d", count);
-	imImage* thumbnail = get_image_thumbnail(addr);
-	IupSetAttributeHandle(list, id, IupImageFromImImage(thumbnail));
-	LL_insert(&images, addr, LL_APPEND);
+	IupSetAttributeHandle(list, id, ll->iThumbnail);
+
 }

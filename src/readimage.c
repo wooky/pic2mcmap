@@ -1,11 +1,13 @@
 #include "header/readimage.h"
 #include "header/mainwindow.h"
+#include "header/maputils.h"
 
 #include <iup.h>
 
 #include <im.h>
 #include <im_image.h>
 #include <im_process_loc.h>
+#include <iupim.h>
 
 #include <string.h>
 #include <stddef.h>
@@ -101,10 +103,12 @@ void parse_image_file(Ihandle* ih, const char* name)
 		imImageReshape(temp, closest128(img->width), closest128(img->height));
 		imProcessResize(img, temp, RESIZE_ORDER);
 		imImageDestroy(img);
-		sprintf(msg, "Image resized to %dX%d\n", temp->width, temp->height);
+		sprintf(msg, "Image resized to %dX%d... ", temp->width, temp->height);
 		log_console(msg);
 		add_image(temp);
 	}
+
+	log_console("OK!\n");
 }
 
 imImage* get_image_thumbnail(imImage* orig)
@@ -113,4 +117,37 @@ imImage* get_image_thumbnail(imImage* orig)
 	imImageReshape(temp, 128, 128);
 	imProcessResize(orig, temp, RESIZE_ORDER);
 	return temp;
+}
+
+imImage** split_to_grid(imImage* orig, unsigned char* rows, unsigned char* cols)
+{
+	unsigned char nCols = orig->width/128, nRows = orig->height/128, i,j;
+
+	*cols = nCols;
+	*rows = nRows;
+	imImage** matrix = malloc(nCols * nRows * sizeof(imImage*));
+	imImage* temp = imImageCreate(128, 128, orig->color_space, orig->data_type);
+
+	for(i = 0; i < nRows; i++)
+	{
+		for(j = 0; j < nCols; j++)
+		{
+			imProcessCrop(orig, temp, j*128, (nRows-i-1)*128);
+			matrix[i*nCols + j] = mapify(temp);
+		}
+	}
+	imImageDestroy(temp);
+
+	return matrix;
+}
+
+Ihandle** grid_images(imImage** matrix, int size)
+{
+	Ihandle** handle = malloc(size * sizeof(Ihandle*));
+	int i;
+
+	for(i = 0; i < size; i++)
+		handle[i] = IupImageFromImImage(matrix[i]);
+
+	return handle;
 }

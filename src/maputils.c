@@ -14,7 +14,7 @@
 //Converted into arrays of {r,g,b}
 #define PALETTE_SIZE 144
 #define TRANSPARENT {0,0,0}	//Invalid pattern just cause
-const int mcpalette[PALETTE_SIZE][3] = {
+const unsigned char mcpalette[PALETTE_SIZE][3] = {
 		TRANSPARENT, TRANSPARENT, TRANSPARENT, TRANSPARENT,
 		{89,125,39},{109,153,48},{127,178,56},{67,94,29},
 		{174,164,115},{213,201,140},{247,233,163},{130,123,86},
@@ -56,9 +56,10 @@ const int mcpalette[PALETTE_SIZE][3] = {
 //Get the nearest color index for the given color
 //Uses square Eucledian distance
 #define square(x) (x)*(x)
-int nearest_color_index(unsigned char r, unsigned char g, unsigned char b)
+short nearest_color_index(unsigned char r, unsigned char g, unsigned char b)
 {
-	int index = -1, diff = INT_MAX, i;
+	short index = -1, i;
+	int diff = INT_MAX;
 
 	for(i = 4; i < PALETTE_SIZE; i++)
 	{

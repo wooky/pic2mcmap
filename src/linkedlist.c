@@ -1,7 +1,11 @@
 #include "header/linkedlist.h"
 #include "header/mainwindow.h"
+#include "header/readimage.h"
 
 #include <iup.h>
+#include <im.h>
+#include <iupim.h>
+
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -10,6 +14,22 @@ void throw_error(int i, int index)
 {
 	char buf[256];
 	sprintf(buf, "[ERROR] Cannot delete element %d, only %d elements exist!\n", index, i);
+}
+
+//Clean inside the linked list and free the memory
+void clean_inside(LinkedList* ll)
+{
+	//free(ll->palette_indexes);
+
+	imImageDestroy(ll->contents);
+	imImageDestroy(ll->thumbnail);
+	//ll->grid
+
+	IupDestroy(ll->iContents);
+	IupDestroy(ll->iThumbnail);
+	//ll->iGrid
+
+	free(ll);
 }
 
 //Get a linked list by index, or throw an error on NULL
@@ -43,13 +63,20 @@ LinkedList* LL_get(LinkedList* head, int index)
 //REQUIRES:	loc		A LinkedList pointer; if index is positive, give the head; otherwise, give the tail
 //			image	The image to be inserted
 //			index	Where to insert the image
-void LL_insert(LinkedList** loc, imImage* image, int index)
+//RETURNS:	The just made linked list
+LinkedList* LL_insert(LinkedList** loc, imImage* image, int index)
 {
 	int i;
 	LinkedList *old_loc, *new_loc;
 
 	LinkedList *img = malloc(sizeof(LinkedList));
 	img->contents = image;
+	img->thumbnail = get_image_thumbnail(image);
+	img->grid = split_to_grid(image, &img->rows, &img->cols);
+
+	img->iContents = IupImageFromImImage(image);
+	img->iThumbnail = IupImageFromImImage(img->thumbnail);
+	img->iGrid = grid_images(img->grid, (img->rows * img->cols));
 
 	//Seek out the address after which to insert the image
 	for(i = 0, old_loc = NULL, new_loc = *loc; i < index; i++, old_loc = new_loc, new_loc = new_loc->next)
@@ -67,6 +94,8 @@ void LL_insert(LinkedList** loc, imImage* image, int index)
 	//Otherwise, link the old location to this one
 	else
 		old_loc->next = img;
+
+	return img;
 }
 
 //Deletes the linked list and its contents
@@ -96,7 +125,7 @@ void LL_remove(LinkedList* head, int index)
 		old_loc->next = new_loc->next;
 
 	//Delete the current entry
-	free(new_loc);
+	clean_inside(new_loc);
 }
 
 void LL_purge(LinkedList* head)
@@ -106,8 +135,7 @@ void LL_purge(LinkedList* head)
 	{
 		LinkedList* old = loc;
 		loc = loc->next;
-		imImageDestroy(old->contents);
-		free(old);
+		clean_inside(old);
 	}
 	head = NULL;
 }
