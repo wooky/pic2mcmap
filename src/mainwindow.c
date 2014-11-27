@@ -102,31 +102,32 @@ void create_mainwindow()
 	//Create the menu
 	Ihandle* menu = IupMenu(
 		create_submenu("&File",(MenuItem[]){
-			{"&Open...\tCtrl+O",(Icallback)open_image_file},
-			{"&Import Map...\tCtrl+I",(Icallback)test},
-			{SEPARATOR},
 			{"&Close\tCtrl+W",NULL},
 			{"C&lose All\tCtrl+Shift+W",NULL},
-			{SEPARATOR},
-			{"&Export to Map...\tCtrl+S",NULL},
-			{"Export to &World...\tCtrl+Shift+S",NULL},
 			{SEPARATOR},
 			{"E&xit", (Icallback)IupExitLoop},
 			{NULL}
 		}),
 		create_submenu("&Image",(MenuItem[]){
+			{"&Open Images...\tCtrl+O",(Icallback)open_image_file},
+			{"&Save to Image\tCtrl+E",NULL},
 			{NULL}
 		}),
 		create_submenu("&Map",(MenuItem[]){
+			{"&Import Maps...\tCtrl+I",(Icallback)test},
+			{"Import Map &Cluster...\tCtrl+Shift+I",NULL},
+			{SEPARATOR},
+			{"&Export to Map\tCtrl+S",NULL},
+			{"Export to &World...\tCtrl+Alt+S",NULL},
 			{NULL}
 		}),
 		create_submenu("&Tools",(MenuItem[]){
-			{"&Options"},
+			{"&Options",NULL},
 			{NULL}
 		}),
 		create_submenu("&Help",(MenuItem[]){
-			{"&Wiki\tF1"},
-			{"&About"},
+			{"&Wiki\tF1",NULL},
+			{"&About",NULL},
 			{NULL}
 		}),
 		NULL
