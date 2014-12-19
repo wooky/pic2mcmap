@@ -10,6 +10,7 @@
 
 #include <stddef.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 Ihandle* console;		//Logging console
 Ihandle* list;			//List of images opened
@@ -22,21 +23,26 @@ LinkedList *images = NULL;	//Size can be accessed by IupGetInt(list,"COUNT")
 //Keyboard shortcuts. Format: {shortcut, callback}
 Keyboard keyboard[] = {
 	{iup_XkeyCtrl(K_O),&open_image_file},
-	{iup_XkeyCtrl(K_I),&test},
+	{iup_XkeyCtrl(K_I),NULL},
 	{iup_XkeyCtrl(K_W),NULL},
 	{iup_XkeyCtrl(iup_XkeyShift(K_W)),NULL},
 	{iup_XkeyCtrl(K_S),NULL},
 	{iup_XkeyCtrl(iup_XkeyShift(K_S)),NULL},
+	{K_F1,&wiki},
 	{(int)NULL}
 };
 
-//temporary, pls remove
-int test(Ihandle* self)
+//Open up the wiki page
+//NOTE! This is a platform specific implementation (unless I want to use CURL, which I don't)
+//Probably won't work on OS X
+int wiki(Ihandle* self)
 {
-	Ihandle* dlg = IupMessageDlg();
-	IupSetAttribute(dlg,"VALUE","ich bin ein test");
-	IupPopup(dlg,IUP_CURRENT,IUP_CURRENT);
-	IupDestroy(dlg);
+#define WIKI_URL "https://github.com/wooky/pic2mcmap/wiki"
+#ifdef WIN32
+	system("start "WIKI_URL);
+#else
+	system("xdg-open "WIKI_URL);
+#endif
 	return IUP_DEFAULT;
 }
 
@@ -102,23 +108,23 @@ void create_mainwindow()
 	//Create the menu
 	Ihandle* menu = IupMenu(
 		create_submenu("&File",(MenuItem[]){
-			{"&Close\tCtrl+W",NULL},
-			{"C&lose All\tCtrl+Shift+W",NULL},
+			{"&Close\tCtrl+W",NULL,1},
+			{"C&lose All\tCtrl+Shift+W",NULL,1},
 			{SEPARATOR},
 			{"E&xit", (Icallback)IupExitLoop},
 			{NULL}
 		}),
 		create_submenu("&Image",(MenuItem[]){
 			{"&Open Images...\tCtrl+O",(Icallback)open_image_file},
-			{"&Save to Image\tCtrl+E",NULL},
+			{"&Save to Image\tCtrl+E",NULL,1},
 			{NULL}
 		}),
 		create_submenu("&Map",(MenuItem[]){
-			{"&Import Maps...\tCtrl+I",(Icallback)test},
+			{"&Import Maps...\tCtrl+I",NULL},
 			{"Import Map &Cluster...\tCtrl+Shift+I",NULL},
 			{SEPARATOR},
-			{"&Export to Map\tCtrl+S",NULL},
-			{"Export to &World...\tCtrl+Alt+S",NULL},
+			{"&Export to Map\tCtrl+S",NULL,1},
+			{"Export to &World...\tCtrl+Alt+S",NULL,1},
 			{NULL}
 		}),
 		create_submenu("&Tools",(MenuItem[]){
@@ -126,7 +132,7 @@ void create_mainwindow()
 			{NULL}
 		}),
 		create_submenu("&Help",(MenuItem[]){
-			{"&Wiki\tF1",NULL},
+			{"&Wiki\tF1",(Icallback)wiki},
 			{"&About",NULL},
 			{NULL}
 		}),
@@ -205,6 +211,8 @@ Ihandle* create_submenu(const char* label, MenuItem* items)
 		{
 			Ihandle* e = IupItem(items[i].label,NULL);
 			IupSetCallback(e,"ACTION",items[i].cb);
+			if(items[i].disabled)
+				IupSetAttribute(e,"ACTIVE","NO");
 			IupAppend(m,e);
 		}
 	}

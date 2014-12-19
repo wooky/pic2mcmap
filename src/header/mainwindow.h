@@ -14,6 +14,7 @@ Ihandle* win;
 typedef struct {
 	const char* label;
 	Icallback cb;
+	char disabled;
 } MenuItem;
 
 typedef int (*FunctionCallback)();
@@ -22,7 +23,7 @@ typedef struct {
 	FunctionCallback cb;
 } Keyboard;
 
-int test(Ihandle*); //pls remove
+int wiki(Ihandle*);
 Icallback k_all(Ihandle*, int);
 int render_image(Ihandle*, char*, int, int);
 void create_mainwindow();

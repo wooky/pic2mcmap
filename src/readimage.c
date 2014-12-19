@@ -119,13 +119,14 @@ imImage* get_image_thumbnail(imImage* orig)
 	return temp;
 }
 
-imImage** split_to_grid(imImage* orig, unsigned char* rows, unsigned char* cols)
+imImage** split_to_grid(imImage* orig, unsigned char* rows, unsigned char* cols, unsigned char* indexes)
 {
 	unsigned char nCols = orig->width/128, nRows = orig->height/128, i,j;
 
 	*cols = nCols;
 	*rows = nRows;
 	imImage** matrix = malloc(nCols * nRows * sizeof(imImage*));
+	indexes = malloc(nCols * 128 * nRows * 128 * sizeof(unsigned char));
 	imImage* temp = imImageCreate(128, 128, orig->color_space, orig->data_type);
 
 	for(i = 0; i < nRows; i++)
@@ -133,7 +134,7 @@ imImage** split_to_grid(imImage* orig, unsigned char* rows, unsigned char* cols)
 		for(j = 0; j < nCols; j++)
 		{
 			imProcessCrop(orig, temp, j*128, (nRows-i-1)*128);
-			matrix[i*nCols + j] = mapify(temp);
+			matrix[i*nCols + j] = mapify(temp, &indexes[(i*nCols + j)*128]);
 		}
 	}
 	imImageDestroy(temp);

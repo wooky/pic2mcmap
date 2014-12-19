@@ -14,6 +14,7 @@ void throw_error(int i, int index)
 {
 	char buf[256];
 	sprintf(buf, "[ERROR] Cannot delete element %d, only %d elements exist!\n", index, i);
+	log_console(buf);
 }
 
 //Clean inside the linked list and free the memory
@@ -72,7 +73,7 @@ LinkedList* LL_insert(LinkedList** loc, imImage* image, int index)
 	LinkedList *img = malloc(sizeof(LinkedList));
 	img->contents = image;
 	img->thumbnail = get_image_thumbnail(image);
-	img->grid = split_to_grid(image, &img->rows, &img->cols);
+	img->grid = split_to_grid(image, &img->rows, &img->cols, img->palette_indexes);
 
 	img->iContents = IupImageFromImImage(image);
 	img->iThumbnail = IupImageFromImImage(img->thumbnail);

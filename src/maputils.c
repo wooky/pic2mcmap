@@ -56,7 +56,7 @@ const unsigned char mcpalette[PALETTE_SIZE][3] = {
 //Get the nearest color index for the given color
 //Uses square Eucledian distance
 #define square(x) (x)*(x)
-short nearest_color_index(unsigned char r, unsigned char g, unsigned char b)
+unsigned char nearest_color_index(unsigned char r, unsigned char g, unsigned char b)
 {
 	short index = -1, i;
 	int diff = INT_MAX;
@@ -79,7 +79,7 @@ short nearest_color_index(unsigned char r, unsigned char g, unsigned char b)
 }
 
 //Convert an image into a map representation (i.e. color degradation) and return a new image
-imImage* mapify(imImage* orig)
+imImage* mapify(imImage* orig, unsigned char* index)
 {
 	imImage* newimg = imImageDuplicate(orig);
 
@@ -90,10 +90,11 @@ imImage* mapify(imImage* orig)
 	int ppp = newimg->count;
 	for(i = 0; i < ppp; i ++)
 	{
-		int closest_index = nearest_color_index(data[i], data[ppp+i], data[ppp*2 + i]);
+		unsigned char closest_index = nearest_color_index(data[i], data[ppp+i], data[ppp*2 + i]);
 		data[i] = mcpalette[closest_index][0];
 		data[ppp+i] = mcpalette[closest_index][1];
 		data[ppp*2 + i] = mcpalette[closest_index][2];
+		index[i] = closest_index;
 	}
 
 	return newimg;
