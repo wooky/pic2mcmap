@@ -100,11 +100,11 @@ LinkedList* LL_insert(LinkedList** loc, imImage* image, int index)
 }
 
 //Deletes the linked list and its contents
-void LL_remove(LinkedList* head, int index)
+void LL_remove(LinkedList** head, int index)
 {
 	int i;
 	LinkedList *old_loc, *new_loc;
-	for(i = 0, old_loc = NULL, new_loc = head; i < index; i++, old_loc = new_loc, new_loc = new_loc->next)
+	for(i = 0, old_loc = NULL, new_loc = *head; i < index; i++, old_loc = new_loc, new_loc = new_loc->next)
 	{
 		//If the current location is NULL, we have gone too far, so throw an error
 		if(new_loc == NULL)
@@ -121,8 +121,11 @@ void LL_remove(LinkedList* head, int index)
 		return;
 	}
 
-	//Replace the previous entry to the one over
-	if(old_loc != NULL)
+	//If we're at the head, try to set the next value as the head (or NULL)
+	if(new_loc == *head)
+		*head = new_loc->next;
+	//Otherwise, replace the previous entry to the one over
+	else if(old_loc != NULL)	//TODO: checking if old_loc isn't NULL is redundant because we already checked that it's not at the head
 		old_loc->next = new_loc->next;
 
 	//Delete the current entry

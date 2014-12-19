@@ -31,5 +31,6 @@ void cleanup();
 Ihandle* create_submenu(const char*, MenuItem*);
 void log_console(const char*);
 void add_image(imImage*);
+int close_image(Ihandle*);
 
 #endif /* MAINWINDOW_H_LEL */

@@ -24,27 +24,13 @@ LinkedList *images = NULL;	//Size can be accessed by IupGetInt(list,"COUNT")
 Keyboard keyboard[] = {
 	{iup_XkeyCtrl(K_O),&open_image_file},
 	{iup_XkeyCtrl(K_I),NULL},
-	{iup_XkeyCtrl(K_W),NULL},
+	{iup_XkeyCtrl(K_W),&close_image},
 	{iup_XkeyCtrl(iup_XkeyShift(K_W)),NULL},
 	{iup_XkeyCtrl(K_S),NULL},
 	{iup_XkeyCtrl(iup_XkeyShift(K_S)),NULL},
 	{K_F1,&wiki},
 	{(int)NULL}
 };
-
-//Open up the wiki page
-//NOTE! This is a platform specific implementation (unless I want to use CURL, which I don't)
-//Probably won't work on OS X
-int wiki(Ihandle* self)
-{
-#define WIKI_URL "https://github.com/wooky/pic2mcmap/wiki"
-#ifdef WIN32
-	system("start "WIKI_URL);
-#else
-	system("xdg-open "WIKI_URL);
-#endif
-	return IUP_DEFAULT;
-}
 
 Icallback k_any(Ihandle* ih, int c)
 {
@@ -108,7 +94,7 @@ void create_mainwindow()
 	//Create the menu
 	Ihandle* menu = IupMenu(
 		create_submenu("&File",(MenuItem[]){
-			{"&Close\tCtrl+W",NULL,1},
+			{"&Close\tCtrl+W",(Icallback)close_image,1},
 			{"C&lose All\tCtrl+Shift+W",NULL,1},
 			{SEPARATOR},
 			{"E&xit", (Icallback)IupExitLoop},
@@ -234,5 +220,41 @@ void add_image(imImage* addr)
 	char id[10];
 	sprintf(id, "IMAGE%d", count);
 	IupSetAttributeHandle(list, id, ll->iThumbnail);
-
 }
+
+//Open up the wiki page
+//NOTE! This is a platform specific implementation (unless I want to use CURL, which I don't)
+//Probably won't work on OS X
+int wiki(Ihandle* self)
+{
+#define WIKI_URL "https://github.com/wooky/pic2mcmap/wiki"
+#ifdef WIN32
+	system("start "WIKI_URL);
+#else
+	system("xdg-open "WIKI_URL);
+#endif
+	return IUP_DEFAULT;
+}
+
+int close_image(Ihandle* self)
+{
+	//Return if we have no images
+	if(!IupGetInt(list, "COUNT"))
+		return IUP_DEFAULT;
+
+	//Remove image from the preview
+	int index = IupGetInt(list, "VALUE") - 1;
+	IupSetAttribute(list, "REMOVEITEM", IupGetAttribute(list, "VALUE"));
+
+	//Set the images displayed to some placeholders (or just wipe everything out)
+	IupSetAttributeHandle(preview, "IMAGE", placeholder);
+	Ihandle* child;
+	while((child = IupGetChild(imgmod, 0)) != NULL)
+		IupDestroy(child);
+
+	//Delete the linked list element associated with the image being deleted
+	LL_remove(&images, index);
+
+	return IUP_DEFAULT;
+}
+
