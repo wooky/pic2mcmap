@@ -20,7 +20,7 @@ void throw_error(int i, int index)
 //Clean inside the linked list and free the memory
 void clean_inside(LinkedList* ll)
 {
-	free(ll->palette_indexes);
+	//free(ll->palette_indexes);
 
 	imImageDestroy(ll->contents);
 	imImageDestroy(ll->thumbnail);
@@ -71,14 +71,13 @@ LinkedList* LL_insert(LinkedList** loc, imImage* image, int index)
 	LinkedList *old_loc, *new_loc;
 
 	LinkedList *img = malloc(sizeof(LinkedList));
-
 	img->contents = image;
 	img->thumbnail = get_image_thumbnail(image);
 	img->grid = split_to_grid(image, &img->rows, &img->cols, &img->palette_indexes);
 
 	img->iContents = IupImageFromImImage(image);
 	img->iThumbnail = IupImageFromImImage(img->thumbnail);
-	img->iGrid = grid_images(img->grid, (img->rows * img->cols));//img->iGrid = grid_images(img->grid, (img->rows * img->cols));
+	img->iGrid = grid_images(img->grid, (img->rows * img->cols));
 
 	//Seek out the address after which to insert the image
 	for(i = 0, old_loc = NULL, new_loc = *loc; i < index; i++, old_loc = new_loc, new_loc = new_loc->next)
