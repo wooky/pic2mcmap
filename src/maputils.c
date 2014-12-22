@@ -79,7 +79,7 @@ unsigned char nearest_color_index(unsigned char r, unsigned char g, unsigned cha
 }
 
 //Convert an image into a map representation (i.e. color degradation) and return a new image
-imImage* mapify(imImage* orig, unsigned char* index)
+imImage* mapify(const imImage* orig, unsigned char* index)
 {
 	imImage* newimg = imImageDuplicate(orig);
 

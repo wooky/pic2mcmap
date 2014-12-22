@@ -19,7 +19,7 @@
 
 int closest128(int x)
 {
-	if(x <= 192)
+	if(x <= 192)	//128*1.5
 		return 128;
 	else
 	{
@@ -111,7 +111,7 @@ void parse_image_file(Ihandle* ih, const char* name)
 	log_console("OK!\n");
 }
 
-imImage* get_image_thumbnail(imImage* orig)
+imImage* get_image_thumbnail(const imImage* orig)
 {
 	imImage *temp = imImageClone(orig);
 	imImageReshape(temp, 128, 128);
@@ -119,30 +119,30 @@ imImage* get_image_thumbnail(imImage* orig)
 	return temp;
 }
 
-imImage** split_to_grid(imImage* orig, unsigned char* rows, unsigned char* cols, unsigned char* indexes)
+imImage** split_to_grid(const imImage* orig, unsigned char* rows, unsigned char* cols, unsigned char** indexes)
 {
 	unsigned char nCols = orig->width/128, nRows = orig->height/128, i,j;
 
 	*cols = nCols;
 	*rows = nRows;
 	imImage** matrix = malloc(nCols * nRows * sizeof(imImage*));
-	indexes = malloc(nCols * 128 * nRows * 128 * sizeof(unsigned char));
-	imImage* temp = imImageCreate(128, 128, orig->color_space, orig->data_type);
+	*indexes = malloc(nCols * 128 * nRows * 128 * sizeof(unsigned char));
 
 	for(i = 0; i < nRows; i++)
 	{
 		for(j = 0; j < nCols; j++)
 		{
+			imImage* temp = imImageCreate(128, 128, orig->color_space, orig->data_type);
 			imProcessCrop(orig, temp, j*128, (nRows-i-1)*128);
-			matrix[i*nCols + j] = mapify(temp, &indexes[(i*nCols + j)*128]);
+			//matrix[i*nCols + j] = mapify(temp, indexes[(i*nCols + j)*128]);
+			imImageDestroy(temp);
 		}
 	}
-	imImageDestroy(temp);
 
 	return matrix;
 }
 
-Ihandle** grid_images(imImage** matrix, int size)
+Ihandle** grid_images(const imImage** matrix, int size)
 {
 	Ihandle** handle = malloc(size * sizeof(Ihandle*));
 	int i;
