@@ -66,7 +66,7 @@ int open_image_file(Ihandle* ih)
 				#endif
 			} else {
 				//Parse the filename
-				parse_image_file(ih, temp);
+				parse_image_file(ih, temp, 0, 0, 0);
 			}
 
 			fnames = fnamesFill + 1;
@@ -75,13 +75,15 @@ int open_image_file(Ihandle* ih)
 
 	//If there's just one file, parse it
 	if(temp[0] == NULL)
-		parse_image_file(ih,fnames);
+		parse_image_file(ih,fnames, 0, 0, 0);
 
 	IupDestroy(dlg);
 	return IUP_DEFAULT;
 }
 
-void parse_image_file(Ihandle* ih, const char* name)
+//Parse the given filename
+//3 last extra arguments to satisfy DROPFILES_CB, because I'm too lazy to write yet another function to call this one
+void parse_image_file(Ihandle* ih, const char* name, int num, int x, int y)
 {
 	char msg[128];
 	int err;

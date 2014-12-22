@@ -89,7 +89,7 @@ int render_image(Ihandle *ih, char *text, int item, int state)
 	return IUP_DEFAULT;
 }
 
-void create_mainwindow()
+void create_mainwindow(int argc, char** argv)
 {
 	//Create the menu
 	Ihandle* menu = IupMenu(
@@ -170,7 +170,13 @@ void create_mainwindow()
 	IupSetAttributes(win,"TITLE=\"Pic2MCMap - Picture to Minecraft map format converter\", MINSIZE=800x600");
 	IupSetAttributeHandle(win,"MENU",menu);
 	IupSetCallback(win,"K_ANY",k_any);
+	IupSetCallback(win, "DROPFILES_CB", parse_image_file);
 	IupShow(win);
+
+	//Now try to open a few files given by the command line
+	int i;
+	for(i = 1; i < argc; i++)
+		parse_image_file(NULL, argv[i], 0, 0, 0);
 }
 
 //Clean up the program by deleting any variables saved in heap
@@ -228,11 +234,7 @@ void add_image(imImage* addr)
 int wiki(Ihandle* self)
 {
 #define WIKI_URL "https://github.com/wooky/pic2mcmap/wiki"
-#ifdef WIN32
-	system("start "WIKI_URL);
-#else
-	system("xdg-open "WIKI_URL);
-#endif
+	IupHelp(WIKI_URL);
 	return IUP_DEFAULT;
 }
 

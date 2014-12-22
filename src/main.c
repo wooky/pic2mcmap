@@ -3,7 +3,7 @@
 #include <iup.h>
 #include <stdio.h>
 
-int main()
+int main(int argc, char** argv)
 {
 	//Initialize IUP
 	if(IupOpen(NULL,NULL) == IUP_ERROR)
@@ -13,7 +13,7 @@ int main()
 	}
 
 	//Create the main window
-	create_mainwindow();
+	create_mainwindow(argc, argv);
 
 	//Mainloop
 	IupMainLoop();
