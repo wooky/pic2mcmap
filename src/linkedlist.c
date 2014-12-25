@@ -132,14 +132,14 @@ void LL_remove(LinkedList** head, int index)
 	clean_inside(new_loc);
 }
 
-void LL_purge(LinkedList* head)
+void LL_purge(LinkedList** head)
 {
-	LinkedList* loc = head;
+	LinkedList* loc = *head;
 	while(loc != NULL)
 	{
 		LinkedList* old = loc;
 		loc = loc->next;
 		clean_inside(old);
 	}
-	head = NULL;
+	*head = NULL;
 }

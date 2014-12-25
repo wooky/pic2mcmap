@@ -27,6 +27,6 @@ typedef struct LinkedList {
 LinkedList* LL_get(LinkedList*, int);
 LinkedList* LL_insert(LinkedList**, imImage*, int);
 void LL_remove(LinkedList**, int);
-void LL_purge(LinkedList*);
+void LL_purge(LinkedList**);
 
 #endif /* SRC_HEADER_LINKEDLIST_H_ */

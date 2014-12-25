@@ -25,7 +25,7 @@ Keyboard keyboard[] = {
 	{iup_XkeyCtrl(K_O),&open_image_file},
 	{iup_XkeyCtrl(K_I),NULL},
 	{iup_XkeyCtrl(K_W),&close_image},
-	{iup_XkeyCtrl(iup_XkeyShift(K_W)),NULL},
+	{iup_XkeyCtrl(iup_XkeyShift(K_W)),&close_all},
 	{iup_XkeyCtrl(K_S),NULL},
 	{iup_XkeyCtrl(iup_XkeyShift(K_S)),NULL},
 	{K_F1,&wiki},
@@ -95,7 +95,7 @@ void create_mainwindow(int argc, char** argv)
 	Ihandle* menu = IupMenu(
 		create_submenu("&File",(MenuItem[]){
 			{"&Close\tCtrl+W",(Icallback)close_image,1},
-			{"C&lose All\tCtrl+Shift+W",NULL,1},
+			{"C&lose All\tCtrl+Shift+W",(Icallback)close_all,1},
 			{SEPARATOR},
 			{"E&xit", (Icallback)IupExitLoop},
 			{NULL}
@@ -184,7 +184,7 @@ void cleanup()
 {
 	IupDestroy(placeholder);
 	IupDestroy(win);
-	LL_purge(images);
+	LL_purge(&images);
 }
 
 //Create a submenu
@@ -256,6 +256,27 @@ int close_image(Ihandle* self)
 
 	//Delete the linked list element associated with the image being deleted
 	LL_remove(&images, index);
+
+	return IUP_DEFAULT;
+}
+
+int close_all(Ihandle* self)
+{
+	//Return if we have no images
+	if(!IupGetInt(list, "COUNT"))
+		return IUP_DEFAULT;
+
+	//Set the images displayed to some placeholders (or just wipe everything out)
+		IupSetAttributeHandle(preview, "IMAGE", placeholder);
+		Ihandle* child;
+		while((child = IupGetChild(imgmod, 0)) != NULL)
+			IupDestroy(child);
+
+	//Remove all images from the preview
+	IupSetAttribute(list, "REMOVEITEM", NULL);
+
+	//Purge the linked list
+	LL_purge(&images);
 
 	return IUP_DEFAULT;
 }

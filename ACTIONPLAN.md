@@ -1,4 +1,3 @@
-* Close all files
 * Save image to Minecraft map format
 * Open one map and render it
 * Save to image
