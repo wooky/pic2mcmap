@@ -1,4 +1,5 @@
 #include "header/mainwindow.h"
+#include "header/datformat.hpp"
 
 #include <iup.h>
 #include <stdio.h>
@@ -36,6 +37,9 @@ int main(int argc, char** argv)
 		printf("Error initializing IUP! Make sure the graphical environment is running.\n");
 		return 1;
 	}
+
+	//Initialize the DAT format driver
+	formatRegisterDAT();
 
 	//Create the main window
 	win = create_mainwindow(argc, argv);
