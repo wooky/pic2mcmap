@@ -26,7 +26,7 @@ typedef struct {
 int wiki(Ihandle*);
 Icallback k_all(Ihandle*, int);
 int render_image(Ihandle*, char*, int, int);
-void create_mainwindow(int, char**);
+Ihandle* create_mainwindow(int, char**);
 void cleanup();
 Ihandle* create_submenu(const char*, MenuItem*);
 void log_console(const char*);

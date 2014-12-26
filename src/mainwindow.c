@@ -89,7 +89,7 @@ int render_image(Ihandle *ih, char *text, int item, int state)
 	return IUP_DEFAULT;
 }
 
-void create_mainwindow(int argc, char** argv)
+Ihandle* create_mainwindow(int argc, char** argv)
 {
 	//Create the menu
 	Ihandle* menu = IupMenu(
@@ -177,6 +177,8 @@ void create_mainwindow(int argc, char** argv)
 	int i;
 	for(i = 1; i < argc; i++)
 		parse_image_file(NULL, argv[i], 0, 0, 0);
+
+	return win;
 }
 
 //Clean up the program by deleting any variables saved in heap
