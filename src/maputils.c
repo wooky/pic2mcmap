@@ -64,8 +64,6 @@ unsigned char nearest_color_index(unsigned char r, unsigned char g, unsigned cha
 	for(i = 4; i < PALETTE_SIZE; i++)
 	{
 		int this_diff = square(r-mcpalette[i][0]) + square(g-mcpalette[i][1]) + square(b-mcpalette[i][2]);
-		//Horrifying result, do not use! It's here for the lulz
-		//int this_diff = abs(r*65536+g*256*b-mcpalette[i][0]*65536-mcpalette[i][1]*256-mcpalette[i][2]);
 		if(this_diff == 0)
 			return i;
 		else if(this_diff < diff)
@@ -98,4 +96,22 @@ imImage* mapify(imImage* orig, unsigned char* index)
 	}
 
 	return newimg;
+}
+
+//Convert a map array to an image
+imImage* unmapify(int width, int height, unsigned char* map)
+{
+	imImage* img = imImageCreate(width, height, IM_MAP, IM_BYTE);
+	unsigned char* data = (unsigned char*)img->data[0];
+	int size = width * height;
+
+	int i;
+	for(i = 0; i < size; i++)
+	{
+		data[i] = mcpalette[map[i]][0];
+		data[size+i] = mcpalette[map[i]][1];
+		data[size*2 + i] = mcpalette[map[i]][2];
+	}
+
+	return img;
 }

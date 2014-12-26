@@ -1,13 +1,12 @@
 #include "header/linkedlist.h"
 #include "header/mainwindow.h"
-#include "header/readimage.h"
-
 #include <iup.h>
 #include <im.h>
 #include <iupim.h>
 
 #include <stdlib.h>
 #include <stdio.h>
+#include "header/imageio.h"
 
 //Throw an error
 void throw_error(int i, int index)

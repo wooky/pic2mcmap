@@ -1,4 +1,4 @@
-#include "header/readimage.h"
+#include "header/imageio.h"
 #include "header/mainwindow.h"
 #include "header/maputils.h"
 
@@ -32,7 +32,8 @@ int open_image_file(Ihandle* ih)
 {
 	//Show the open file dialog
 	Ihandle* dlg = IupFileDlg();
-	IupSetAttributes(dlg,"EXTFILTER=\"Common Picture Files|*.bmp;*.gif;*.jpg;*.jpeg;*.png|All Files|*.*|\", MULTIPLEFILES=YES");
+	IupSetAttributes(dlg,"EXTFILTER=\"All Supported Files|*.bmp;*.gif;*.jpg;*.jpeg;*.png;*.dat|Common Picture Files|*.bmp;*.gif;*.jpg;*.jpeg;*.png|"
+			"Minecraft NBT Map Format|*.dat|All Files|*.*|\", MULTIPLEFILES=YES");
 	IupPopup(dlg,IUP_CURRENT,IUP_CURRENT);
 
 	//If the user didn't cancel out of the dialog, continue

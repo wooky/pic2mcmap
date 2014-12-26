@@ -1,5 +1,5 @@
 #include "header/mainwindow.h"
-#include "header/readimage.h"
+#include "header/imageio.h"
 #include "header/linkedlist.h"
 #include "header/maputils.h"
 
@@ -94,19 +94,17 @@ Ihandle* create_mainwindow(int argc, char** argv)
 	//Create the menu
 	Ihandle* menu = IupMenu(
 		create_submenu("&File",(MenuItem[]){
+			{"&Open...\tCtrl+O",(Icallback)open_image_file},
 			{"&Close\tCtrl+W",(Icallback)close_image,1},
 			{"C&lose All\tCtrl+Shift+W",(Icallback)close_all,1},
+			{SEPARATOR},
+			{"&Save to Map...\tCtrl+S",NULL,1},
+			{"&Export to Image...\tCtrl+E",NULL,1},
 			{SEPARATOR},
 			{"E&xit", (Icallback)IupExitLoop},
 			{NULL}
 		}),
-		create_submenu("&Image",(MenuItem[]){
-			{"&Open Images...\tCtrl+O",(Icallback)open_image_file},
-			{"&Save to Image\tCtrl+E",NULL,1},
-			{NULL}
-		}),
 		create_submenu("&Map",(MenuItem[]){
-			{"&Import Maps...\tCtrl+I",NULL},
 			{"Import Map &Cluster...\tCtrl+Shift+I",NULL},
 			{SEPARATOR},
 			{"&Export to Map\tCtrl+S",NULL,1},
