@@ -1,6 +1,7 @@
 #include "header/imageio.h"
 #include "header/mainwindow.h"
-#include "header/maputils.h"
+//#include "header/maputils.h"
+#include "header/datformat.hpp"
 
 #include <iup.h>
 
@@ -8,6 +9,7 @@
 #include <im_image.h>
 #include <im_process_loc.h>
 #include <iupim.h>
+#include <im_convert.h>
 
 #include <string.h>
 #include <stddef.h>
@@ -137,7 +139,7 @@ imImage** split_to_grid(imImage* orig, unsigned char* rows, unsigned char* cols,
 		for(j = 0; j < nCols; j++)
 		{
 			imProcessCrop(orig, temp, j*128, (nRows-i-1)*128);
-			matrix[i*nCols + j] = mapify(temp, *indexes+(i*nCols + j)*128);
+			matrix[i*nCols + j] = mapify(temp);//, *indexes+(i*nCols + j)*128);
 		}
 	}
 	imImageDestroy(temp);

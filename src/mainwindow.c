@@ -1,7 +1,6 @@
 #include "header/mainwindow.h"
 #include "header/imageio.h"
 #include "header/linkedlist.h"
-#include "header/maputils.h"
 
 #include <iup.h>
 #include <im_image.h>
@@ -66,7 +65,7 @@ int render_image(Ihandle *ih, char *text, int item, int state)
 		IupRefresh(preview);
 
 		//Recreate the grid where to put all the images
-		/*Ihandle* child;
+		Ihandle* child;
 		while((child = IupGetChild(imgmod, 0)) != NULL)
 			IupDestroy(child);
 		IupSetInt(imgmod, "NUMDIV", ll->cols);
@@ -84,7 +83,7 @@ int render_image(Ihandle *ih, char *text, int item, int state)
 			}
 			IupMap(tinyimg);
 		}
-		IupRefresh(imgmod);*/
+		IupRefresh(imgmod);
 	}
 	return IUP_DEFAULT;
 }

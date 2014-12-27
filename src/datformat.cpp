@@ -3,13 +3,18 @@
 
 #include "header/nbt/nbt.h"
 
+#include <im_image.h>
 #include <im_format.h>
 #include <im_counter.h>
+#include <im_palette.h>
+#include <im_util.h>
 
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 
-#define TRANSPARENT_MAP 0xFF00FF
+#define TRANSPARENT_MAP 0xFF00FF	//A color to represent transparency (i.e. eye-bleeding magenta)
+#define DATPALETTE_SIZE_EFFECTIVE 140
 long DATPaletteMap[256] = {
 		TRANSPARENT_MAP, TRANSPARENT_MAP, TRANSPARENT_MAP, TRANSPARENT_MAP,	//First 4 are transparent
 		0x597D27, 0x6D9930, 0x7FB238, 0x435E1D,
@@ -46,7 +51,7 @@ long DATPaletteMap[256] = {
 		0x345AB4, 0x3F6EDC, 0x4A80FF, 0x274387,
 		0x009928, 0x00BB32, 0x00D93A, 0x00721E,
 		0x0E0E15, 0x12111A, 0x15141F, 0x0B0A10,
-		0x4F0100, 0x600100, 0x700200, 0x3B0100			//The rest is padding
+		0x4F0100, 0x600100, 0x700200, 0x3B0100			//The rest is padded
 };
 
 //This is the palette used by the Minecraft maps
@@ -98,10 +103,50 @@ static const char* DATCompression[DATCOMPRESSION_SIZE] = {
 		"NONE"
 };
 
+//Get the nearest color index for the given color
+//Uses square Eucledian distance
+#define square(x) (x)*(x)
+extern "C" unsigned char nearest_color_index(unsigned char r, unsigned char g, unsigned char b)
+{
+	short index = -1, i;
+	unsigned int diff = -1;
+
+	for(i = 4; i < DATPALETTE_SIZE; i++)
+	{
+		unsigned int this_diff = square(r-DATPalette[i][0]) + square(g-DATPalette[i][1]) + square(b-DATPalette[i][2]);
+		if(this_diff == 0)
+			return i;
+		else if(this_diff < diff)
+		{
+			index = i;
+			diff = this_diff;
+		}
+	}
+
+	return index;
+}
+
+extern "C" imImage* mapify(imImage* orig)
+{
+	//Get the original image's width and height, anything else will be modified
+	imImage* mod = imImageCreate(orig->width, orig->height, IM_MAP | IM_TOPDOWN, IM_BYTE);
+
+	//Set the palette
+	mod->palette = DATPaletteMap;
+
+	//Get the closest index for each pixel and save it to the new image
+	int i, ppp = orig->count;
+	unsigned char *data = (unsigned char*)orig->data[0], *nova = (unsigned char*)mod->data[0];
+	for(i = 0; i < ppp; i++)
+		nova[i] = nearest_color_index(data[i], data[i+ppp], data[i+ppp*2]);
+
+	return mod;
+}
+
 class DATFileFormat : public imFileFormatBase
 {
 	nbt_node *node, *data;
-
+	FILE* fp = NULL;
 
 public:
 	DATFileFormat(const imFormat* _iformat): imFileFormatBase(_iformat) {}
@@ -150,12 +195,37 @@ int DATFileFormat::Open(const char* file_name)
 
 int DATFileFormat::New(const char* file_name)
 {
-	return IM_ERR_ACCESS;
+	//We need some string constants
+#define DATA_CHAR_LENGTH 5
+	char* daytuh = (char*)malloc(sizeof(char) * DATA_CHAR_LENGTH);
+	if(!daytuh)
+		return IM_ERR_MEM;
+	strcpy(daytuh, "data");
+
+	//Set up a few NBT nodes
+	this->node = static_cast<nbt_node*>(malloc(sizeof(nbt_node)));
+	if(!this->node)
+		return IM_ERR_MEM;
+	this->node->payload.tag_compound->data = this->data = static_cast<nbt_node*>(malloc(sizeof(nbt_node)));
+	if(!this->data)
+		return IM_ERR_MEM;
+
+	this->node->type = TAG_COMPOUND;
+
+	this->data->name = daytuh;
+
+	//Open the file that we're going to write into
+	if(!(this->fp = fopen(file_name, "w")))
+		return IM_ERR_OPEN;
+
+	return IM_ERR_NONE;
 }
 
 void DATFileFormat::Close()
 {
 	nbt_free(this->node);
+	if(fp)
+		fclose(fp);
 }
 
 void* DATFileFormat::Handle(int index)
@@ -166,7 +236,7 @@ void* DATFileFormat::Handle(int index)
 int DATFileFormat::ReadImageInfo(int index)
 {
 	//Set the image type
-	this->user_color_mode = this->file_color_mode = IM_MAP | IM_PACKED | IM_TOPDOWN;
+	this->user_color_mode = this->file_color_mode = IM_MAP | IM_TOPDOWN;
 	this->user_color_mode = this->file_data_type = IM_BYTE;
 
 	//Get width and height (and hope none of them are null)
@@ -208,7 +278,12 @@ int DATFileFormat::ReadImageData(void* data)
 	return IM_ERR_NONE;
 }
 
-int DATFileFormat::WriteImageInfo() {return 0;}
+int DATFileFormat::WriteImageInfo()
+{
+
+
+	return IM_ERR_NONE;
+}
 
 int DATFileFormat::WriteImageData(void* data) {return 0;}
 
