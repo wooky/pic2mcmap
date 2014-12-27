@@ -9,9 +9,9 @@
 #include <string.h>
 #include <stdlib.h>
 
-/*#define TRANSPARENT (long)-1
-long DATPalette[256] = {
-		TRANSPARENT, TRANSPARENT, TRANSPARENT, TRANSPARENT,	//First 4 are transparent
+#define TRANSPARENT_MAP 0xFF00FF
+long DATPaletteMap[256] = {
+		TRANSPARENT_MAP, TRANSPARENT_MAP, TRANSPARENT_MAP, TRANSPARENT_MAP,	//First 4 are transparent
 		0x597D27, 0x6D9930, 0x7FB238, 0x435E1D,
 		0xAEA473, 0xD5C98C, 0xF7E9A3, 0x827B56,
 		0x757575, 0x909090, 0xA7A7A7, 0x585858,
@@ -47,7 +47,7 @@ long DATPalette[256] = {
 		0x009928, 0x00BB32, 0x00D93A, 0x00721E,
 		0x0E0E15, 0x12111A, 0x15141F, 0x0B0A10,
 		0x4F0100, 0x600100, 0x700200, 0x3B0100			//The rest is padding
-};*/
+};
 
 //This is the palette used by the Minecraft maps
 //Retrieved from http://minecraft.gamepedia.com/Map_item_format#Map_colors
@@ -166,12 +166,15 @@ void* DATFileFormat::Handle(int index)
 int DATFileFormat::ReadImageInfo(int index)
 {
 	//Set the image type
-	this->user_color_mode = this->file_color_mode = IM_RGB | IM_PACKED | IM_TOPDOWN;
+	this->user_color_mode = this->file_color_mode = IM_MAP | IM_PACKED | IM_TOPDOWN;
 	this->user_color_mode = this->file_data_type = IM_BYTE;
 
 	//Get width and height (and hope none of them are null)
 	this->height = static_cast<int>(nbt_find_by_name(this->data, "height")->payload.tag_short);
 	this->width = static_cast<int>(nbt_find_by_name(this->data, "height")->payload.tag_short);
+
+	//Set the palette
+	memcpy(this->palette, DATPaletteMap, 256);
 
 	return IM_ERR_NONE;
 }
@@ -192,9 +195,10 @@ int DATFileFormat::ReadImageData(void* data)
 	//Fill the data with the colors
 	for(int row = 0; row < this->height; row++)
 	{
-		for(int pixel = 0; pixel < this->width; pixel++)
-			memcpy((void*)((char*)this->line_buffer + pixel*3), (void*)DATPalette[colors->payload.tag_byte_array.data[row*this->width + pixel]], 3);
+		//for(int pixel = 0; pixel < this->width; pixel++)
+		//	memcpy((void*)((char*)this->line_buffer + pixel*3), (void*)DATPalette[colors->payload.tag_byte_array.data[row*this->width + pixel]], 3);
 			//     ^ Skip the buffer pointer by 3 bytes         ^ The colors from the palette corresponding to the current pixel's ID            ^ We're given 3 values, {r,g,b}
+		memcpy(this->line_buffer, colors->payload.tag_byte_array.data + this->width*row, 128);
 
 		imFileLineBufferRead(this, data, row, 0);
 		if(!imCounterInc(this->counter))
