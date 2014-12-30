@@ -5,5 +5,6 @@
 * Get the menu items to behave properly, i.e. get enabled when needed
 * Read from a config file
 * Set up an options menu
+* Write wiki entries for the program
 * ???
 * Profit
