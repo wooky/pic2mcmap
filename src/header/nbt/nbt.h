@@ -303,7 +303,7 @@ nbt_node* nbt_list_item(nbt_node* list, int n);
                       /***** Utility Functions *****/
 
 /* Returns true if the trees are identical. */
-bool nbt_eq(const nbt_node* restrict a, const nbt_node* restrict b);
+bool nbt_eq(const nbt_node* a, const nbt_node* b);
 
 /*
  * Converts a type to a print-friendly string. The string is statically
