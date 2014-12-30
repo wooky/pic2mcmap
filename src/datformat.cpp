@@ -107,8 +107,12 @@ static const char* DATCompression[DATCOMPRESSION_SIZE] = {
 //Uses square Eucledian distance
 //We're using this function rather than the one given by IM because that one sucks for some reason
 #define square(x) (x)*(x)
-extern "C" unsigned char nearest_color_index(unsigned char r, unsigned char g, unsigned char b)
+extern "C" unsigned char nearest_color_index(unsigned char r, unsigned char g, unsigned char b, unsigned char a)
 {
+	//If the image is too transparent, return transparent
+	if(a < 128)
+		return 0;
+
 	short index = -1, i;
 	unsigned int diff = -1;
 
@@ -134,16 +138,39 @@ extern "C" imImage* mapify(imImage* orig)
 		return imImageDuplicate(orig);
 
 	//Get the original image's width and height, anything else will be modified
-	imImage* mod = imImageCreate(orig->width, orig->height, IM_MAP | IM_TOPDOWN, IM_BYTE);
+	imImage* mod = imImageCreateBased(orig, -1, -1, IM_MAP | IM_TOPDOWN, IM_BYTE);
 
 	//Set the palette
 	mod->palette = DATPaletteMap;
 
+	//Is it a map? Is there an alpha layer? How many layers in total?
+	char isMap = orig->color_space & IM_MAP;
+	int alphaLayer = orig->depth;
+	short hasAlpha = orig->has_alpha;	//Can't be a char because has_alpha can be 256
+
 	//Get the closest index for each pixel and save it to the new image
 	int i, ppp = orig->count;
 	unsigned char *data = (unsigned char*)orig->data[0], *nova = (unsigned char*)mod->data[0];
+
 	for(i = 0; i < ppp; i++)
-		nova[i] = nearest_color_index(data[i], data[i+ppp], data[i+ppp*2]);
+	{
+		unsigned char r,g,b;
+
+		//Get the alpha, if it has any
+		unsigned char a = hasAlpha ? data[i+ppp*alphaLayer] : 255;
+
+		//If it's a map format, the colors are based on the palette
+		if(isMap)
+			imColorDecode(&r, &g, &b, orig->palette[data[i]]);
+		//Otherwise, it's packed
+		else
+		{
+			r = data[i];
+			g = data[i+ppp];
+			b = data[i+ppp*2];
+		}
+		nova[i] = nearest_color_index(r, g, b, a);
+	}
 
 	return mod;
 }
