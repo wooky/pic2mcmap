@@ -10,6 +10,7 @@
 #include <im_process_loc.h>
 #include <iupim.h>
 #include <im_convert.h>
+#include <im_util.h>
 
 #include <string.h>
 #include <stddef.h>
@@ -132,14 +133,16 @@ imImage** split_to_grid(imImage* orig, unsigned char* rows, unsigned char* cols,
 	*rows = nRows;
 	imImage** matrix = malloc(nCols * nRows * sizeof(imImage*));
 	*indexes = malloc(nCols * 128 * nRows * 128 * sizeof(unsigned char));
-	imImage* temp = imImageCreate(128, 128, orig->color_space, orig->data_type);
+	imImage* temp = imImageCreateBased(orig, 128, 128, -1, -1);
 
 	for(i = 0; i < nRows; i++)
 	{
 		for(j = 0; j < nCols; j++)
 		{
-			imProcessCrop(orig, temp, j*128, (nRows-i-1)*128);
-			matrix[i*nCols + j] = mapify(temp);//, *indexes+(i*nCols + j)*128);
+			//                               When the image is top-down, crop the top; otherwise, from the "bottom" (which is actually the top)
+			imProcessCrop(orig, temp, j*128, imColorModeIsTopDown(orig->color_space) ? i*128 : (nRows-i-1)*128);
+
+			matrix[i*nCols + j] = mapify(temp);
 		}
 	}
 	imImageDestroy(temp);

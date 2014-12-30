@@ -105,6 +105,7 @@ static const char* DATCompression[DATCOMPRESSION_SIZE] = {
 
 //Get the nearest color index for the given color
 //Uses square Eucledian distance
+//We're using this function rather than the one given by IM because that one sucks for some reason
 #define square(x) (x)*(x)
 extern "C" unsigned char nearest_color_index(unsigned char r, unsigned char g, unsigned char b)
 {
@@ -128,6 +129,10 @@ extern "C" unsigned char nearest_color_index(unsigned char r, unsigned char g, u
 
 extern "C" imImage* mapify(imImage* orig)
 {
+	//If the original file is already a DAT file, just dupe the given image and return it
+	if(imImageGetAttribute(orig, "DAT", NULL, NULL))
+		return imImageDuplicate(orig);
+
 	//Get the original image's width and height, anything else will be modified
 	imImage* mod = imImageCreate(orig->width, orig->height, IM_MAP | IM_TOPDOWN, IM_BYTE);
 
@@ -246,6 +251,9 @@ int DATFileFormat::ReadImageInfo(int index)
 	//Set the palette
 	memcpy(this->palette, DATPaletteMap, 256);
 
+	//Tell everyone that this image is a DAT file
+	AttribTable()->SetInteger("DAT", IM_BYTE, 1);
+
 	return IM_ERR_NONE;
 }
 
@@ -265,11 +273,9 @@ int DATFileFormat::ReadImageData(void* data)
 	//Fill the data with the colors
 	for(int row = 0; row < this->height; row++)
 	{
-		//for(int pixel = 0; pixel < this->width; pixel++)
-		//	memcpy((void*)((char*)this->line_buffer + pixel*3), (void*)DATPalette[colors->payload.tag_byte_array.data[row*this->width + pixel]], 3);
-			//     ^ Skip the buffer pointer by 3 bytes         ^ The colors from the palette corresponding to the current pixel's ID            ^ We're given 3 values, {r,g,b}
 		memcpy(this->line_buffer, colors->payload.tag_byte_array.data + this->width*row, 128);
 
+		//Honestly, I don't know what this does, but the other files have this, so it must be important
 		imFileLineBufferRead(this, data, row, 0);
 		if(!imCounterInc(this->counter))
 			return IM_ERR_COUNTER;
