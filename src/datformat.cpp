@@ -266,7 +266,7 @@ int DATFileFormat::ReadImageInfo(int index)
 	this->width = static_cast<int>(nbt_find_by_name(this->data, "height")->payload.tag_short);
 
 	//Set the palette
-	memcpy(this->palette, DATPaletteMap, 256);
+	memcpy(this->palette, DATPaletteMap, 256*sizeof(long));
 
 	//Tell everyone that this image is a DAT file
 	AttribTable()->SetInteger("DAT", IM_BYTE, 1);
