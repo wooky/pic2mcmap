@@ -8,7 +8,7 @@
 int open_image_file(Ihandle*);
 void parse_image_file(Ihandle*, const char*, int, int, int);
 imImage* get_image_thumbnail(imImage*);
-imImage** split_to_grid(imImage*, unsigned char*, unsigned char*, unsigned char**);
+imImage** split_to_grid(imImage*, unsigned char*, unsigned char*);
 Ihandle** grid_images(imImage**, int);
 
 int save_image_file(Ihandle*);

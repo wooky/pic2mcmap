@@ -225,8 +225,6 @@ void add_image(imImage* addr)
 }
 
 //Open up the wiki page
-//NOTE! This is a platform specific implementation (unless I want to use CURL, which I don't)
-//Probably won't work on OS X
 int wiki(Ihandle* self)
 {
 #define WIKI_URL "https://github.com/wooky/pic2mcmap/wiki"

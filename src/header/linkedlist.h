@@ -11,7 +11,6 @@
 
 typedef struct LinkedList {
 	unsigned char rows, cols;
-	unsigned char* palette_indexes;
 
 	imImage* contents;
 	imImage* thumbnail;

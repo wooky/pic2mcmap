@@ -130,14 +130,13 @@ imImage* get_image_thumbnail(imImage* orig)
 	return temp;
 }
 
-imImage** split_to_grid(imImage* orig, unsigned char* rows, unsigned char* cols, unsigned char** indexes)
+imImage** split_to_grid(imImage* orig, unsigned char* rows, unsigned char* cols)
 {
 	unsigned char nCols = orig->width/128, nRows = orig->height/128, i,j;
 
 	*cols = nCols;
 	*rows = nRows;
 	imImage** matrix = malloc(nCols * nRows * sizeof(imImage*));
-	*indexes = malloc(nCols * 128 * nRows * 128 * sizeof(unsigned char));
 	imImage* temp = imImageCreateBased(orig, 128, 128, -1, -1);
 
 	for(i = 0; i < nRows; i++)
