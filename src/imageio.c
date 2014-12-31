@@ -165,31 +165,31 @@ Ihandle** grid_images(imImage** matrix, int size)
 	return handle;
 }
 
-int save_image_file(Ihandle* ih)
+void save_file(const char* filter, const char* type, const char* extension)
 {
 	//Making sure we actually have an image selected
 	if(!IupGetInt(list, "COUNT"))
-		return IUP_DEFAULT;
+		return;
 
 	int val = IupGetInt(list,"VALUE");
 	if(val <= 0)
-		return IUP_DEFAULT;
+		return;
 
 	LinkedList* ll = LL_get(images, val-1);
 	if(!ll)
-		return IUP_DEFAULT;
+		return;
 
 	//Show the save file dialog
 	Ihandle* dlg = IupFileDlg();
-	IupSetAttributes(dlg,"EXTFILTER=\"All Supported Files|*.bmp;*.gif;*.jpg;*.jpeg;*.png;*.dat|Common Picture Files|*.bmp;*.gif;*.jpg;*.jpeg;*.png|"
-			"Minecraft NBT Map Format|*.dat|All Files|*.*|\", DIALOGTYPE=SAVE");
+	IupSetAttribute(dlg, "DIALOGTYPE", "SAVE");
+	IupSetAttribute(dlg, "EXTFILTER", filter);
 	IupPopup(dlg,IUP_CURRENT,IUP_CURRENT);
 
 	//If the user didn't cancel out of the dialog, continue
 	if(IupGetInt(dlg,"STATUS") == -1)
 	{
 		IupDestroy(dlg);
-		return IUP_DEFAULT;
+		return;
 	}
 
 	//If we have at least one file, continue
@@ -197,15 +197,16 @@ int save_image_file(Ihandle* ih)
 	if(fname == NULL)
 	{
 		IupDestroy(dlg);
-		return IUP_DEFAULT;
+		return;
 	}
 
 	//Save the image to the file
-	char msg[128];
-	sprintf(msg, "Saving to %s... ", fname);
+	char msg[1024];
+	sprintf(msg, "Saving to %s%s... ", fname, extension);
 	log_console(msg);
 
-	int err = imFileImageSave(fname, "DAT", ll->grid[0]) != IM_ERR_NONE;
+	sprintf(msg, "%s%s", fname, extension);
+	int err = imFileImageSave(msg, type, ll->grid[0]) != IM_ERR_NONE;
 	if(err != IM_ERR_NONE)
 	{
 		sprintf(msg, "FAIL: Error %d\n", err);
@@ -215,5 +216,4 @@ int save_image_file(Ihandle* ih)
 		log_console("OK!\n");
 
 	IupDestroy(dlg);
-	return IUP_DEFAULT;
 }

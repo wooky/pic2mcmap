@@ -39,5 +39,7 @@ void log_console(const char*);
 void add_image(imImage*);
 int close_image(Ihandle*);
 int close_all(Ihandle*);
+int save_nbt(Ihandle*);
+int export_image(Ihandle*);
 
 #endif /* MAINWINDOW_H_LEL */

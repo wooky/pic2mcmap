@@ -11,6 +11,6 @@ imImage* get_image_thumbnail(imImage*);
 imImage** split_to_grid(imImage*, unsigned char*, unsigned char*);
 Ihandle** grid_images(imImage**, int);
 
-int save_image_file(Ihandle*);
+void save_file(const char* filter, const char* type, const char* extension);
 
 #endif /* READIMAGE_H_ */

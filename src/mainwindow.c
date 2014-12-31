@@ -22,8 +22,8 @@ Keyboard keyboard[] = {
 	{iup_XkeyCtrl(K_I),NULL},
 	{iup_XkeyCtrl(K_W),&close_image},
 	{iup_XkeyCtrl(iup_XkeyShift(K_W)),&close_all},
-	{iup_XkeyCtrl(K_S),&save_image_file},
-	{iup_XkeyCtrl(iup_XkeyShift(K_S)),NULL},
+	{iup_XkeyCtrl(K_S),&save_nbt},
+	{iup_XkeyCtrl(K_E),&export_image},
 	{K_F1,&wiki},
 	{(int)NULL}
 };
@@ -94,16 +94,14 @@ Ihandle* create_mainwindow(int argc, char** argv)
 			{"&Close\tCtrl+W",(Icallback)close_image,1},
 			{"C&lose All\tCtrl+Shift+W",(Icallback)close_all,1},
 			{SEPARATOR},
-			{"&Save to Map...\tCtrl+S",(Icallback)save_image_file,1},
-			{"&Export to Image...\tCtrl+E",NULL,1},
+			{"&Save to Map...\tCtrl+S",(Icallback)save_nbt,1},
+			{"&Export to Image...\tCtrl+E",(Icallback)export_image,1},
 			{SEPARATOR},
 			{"E&xit", (Icallback)IupExitLoop},
 			{NULL}
 		}),
 		create_submenu("&Map",(MenuItem[]){
-			{"Import Map &Cluster...\tCtrl+Shift+I",NULL},
-			{SEPARATOR},
-			{"&Export to Map\tCtrl+S",NULL,1},
+			{"Import Map &Cluster...\tCtrl+I",NULL},
 			{"Export to &World...\tCtrl+Alt+S",NULL,1},
 			{NULL}
 		}),
@@ -272,6 +270,18 @@ int close_all(Ihandle* self)
 	//Purge the linked list
 	LL_purge(&images);
 
+	return IUP_DEFAULT;
+}
+
+int save_nbt(Ihandle* self)
+{
+	save_file("Minecraft DAT Map Format|*.dat|", "DAT", ".dat");
+	return IUP_DEFAULT;
+}
+
+int export_image(Ihandle* self)
+{
+	save_file("GIF Image File|*.gif|", "GIF", ".gif");
 	return IUP_DEFAULT;
 }
 

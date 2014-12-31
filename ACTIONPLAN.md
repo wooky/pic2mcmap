@@ -1,4 +1,5 @@
-* Save to image
+* Save to image cluster
+* Save to map cluster
 * Open map cluster
 * Get the menu items to behave properly, i.e. get enabled when needed
 * Read from a config file
