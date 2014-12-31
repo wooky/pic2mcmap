@@ -1,10 +1,9 @@
-* Account for 1-plane images when reading them
-* Save image to Minecraft map format
 * Save to image
 * Open map cluster
 * Get the menu items to behave properly, i.e. get enabled when needed
 * Read from a config file
 * Set up an options menu
-* Write wiki entries for the program
+* Make a Makefile for easy compilation
+* Write wiki entries, README for the program
 * ???
 * Profit
