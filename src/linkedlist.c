@@ -12,7 +12,7 @@
 void throw_error(int i, int index)
 {
 	char buf[256];
-	sprintf(buf, "[ERROR] Cannot delete element %d, only %d elements exist!\n", index, i);
+	sprintf(buf, "[ERROR] Cannot access element %d, only %d elements exist!\n", index, i);
 	log_console(buf);
 }
 

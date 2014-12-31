@@ -12,12 +12,9 @@
 #include <stdlib.h>
 
 Ihandle* console;		//Logging console
-Ihandle* list;			//List of images opened
 Ihandle* placeholder;	//This is needed for some reason
 Ihandle* preview;		//Previewed image
 Ihandle* imgmod;		//Modified image (grid)
-
-LinkedList *images = NULL;	//Size can be accessed by IupGetInt(list,"COUNT")
 
 //Keyboard shortcuts. Format: {shortcut, callback}
 Keyboard keyboard[] = {
@@ -25,7 +22,7 @@ Keyboard keyboard[] = {
 	{iup_XkeyCtrl(K_I),NULL},
 	{iup_XkeyCtrl(K_W),&close_image},
 	{iup_XkeyCtrl(iup_XkeyShift(K_W)),&close_all},
-	{iup_XkeyCtrl(K_S),NULL},
+	{iup_XkeyCtrl(K_S),&save_image_file},
 	{iup_XkeyCtrl(iup_XkeyShift(K_S)),NULL},
 	{K_F1,&wiki},
 	{(int)NULL}
@@ -97,7 +94,7 @@ Ihandle* create_mainwindow(int argc, char** argv)
 			{"&Close\tCtrl+W",(Icallback)close_image,1},
 			{"C&lose All\tCtrl+Shift+W",(Icallback)close_all,1},
 			{SEPARATOR},
-			{"&Save to Map...\tCtrl+S",NULL,1},
+			{"&Save to Map...\tCtrl+S",(Icallback)save_image_file,1},
 			{"&Export to Image...\tCtrl+E",NULL,1},
 			{SEPARATOR},
 			{"E&xit", (Icallback)IupExitLoop},

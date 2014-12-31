@@ -2,6 +2,7 @@
 #include "header/datformat.hpp"
 
 #include "header/nbt/nbt.h"
+#include "header/nbttemplate.h"
 
 #include <im_image.h>
 #include <im_format.h>
@@ -179,6 +180,7 @@ class DATFileFormat : public imFileFormatBase
 {
 	nbt_node *node, *data;
 	FILE* fp = NULL;
+	unsigned char* nbt = NULL;
 
 public:
 	DATFileFormat(const imFormat* _iformat): imFileFormatBase(_iformat) {}
@@ -227,37 +229,25 @@ int DATFileFormat::Open(const char* file_name)
 
 int DATFileFormat::New(const char* file_name)
 {
-	//We need some string constants
-#define DATA_CHAR_LENGTH 5
-	char* daytuh = (char*)malloc(sizeof(char) * DATA_CHAR_LENGTH);
-	if(!daytuh)
-		return IM_ERR_MEM;
-	strcpy(daytuh, "data");
-
-	//Set up a few NBT nodes
-	this->node = static_cast<nbt_node*>(malloc(sizeof(nbt_node)));
-	if(!this->node)
-		return IM_ERR_MEM;
-	this->node->payload.tag_compound->data = this->data = static_cast<nbt_node*>(malloc(sizeof(nbt_node)));
-	if(!this->data)
-		return IM_ERR_MEM;
-
-	this->node->type = TAG_COMPOUND;
-
-	this->data->name = daytuh;
-
 	//Open the file that we're going to write into
-	if(!(this->fp = fopen(file_name, "w")))
+	if(!(this->fp = fopen(file_name, "wb")))
 		return IM_ERR_OPEN;
+
+	//Get a template NBT file
+	if(!(this->node = create_nbt_template()) || !(this->data = nbt_find_by_name(this->node, "data")))
+		return IM_ERR_MEM;
+
+	this->image_count = 1;
 
 	return IM_ERR_NONE;
 }
 
 void DATFileFormat::Close()
 {
-	nbt_free(this->node);
-	if(fp)
-		fclose(fp);
+	if(this->node)
+		nbt_free(this->node);
+	if(this->fp)
+		fclose(this->fp);
 }
 
 void* DATFileFormat::Handle(int index)
@@ -269,7 +259,7 @@ int DATFileFormat::ReadImageInfo(int index)
 {
 	//Set the image type
 	this->user_color_mode = this->file_color_mode = IM_MAP | IM_TOPDOWN;
-	this->user_color_mode = this->file_data_type = IM_BYTE;
+	this->user_data_type = this->file_data_type = IM_BYTE;
 
 	//Get width and height (and hope none of them are null)
 	this->height = static_cast<int>(nbt_find_by_name(this->data, "height")->payload.tag_short);
@@ -300,7 +290,7 @@ int DATFileFormat::ReadImageData(void* data)
 	//Fill the data with the colors
 	for(int row = 0; row < this->height; row++)
 	{
-		memcpy(this->line_buffer, colors->payload.tag_byte_array.data + this->width*row, 128);
+		memcpy(this->line_buffer, colors->payload.tag_byte_array.data + this->width*row, this->width);
 
 		//Honestly, I don't know what this does, but the other files have this, so it must be important
 		imFileLineBufferRead(this, data, row, 0);
@@ -313,11 +303,32 @@ int DATFileFormat::ReadImageData(void* data)
 
 int DATFileFormat::WriteImageInfo()
 {
-
+	this->user_color_mode = this->file_color_mode = IM_MAP;
+	this->user_data_type = this->file_data_type = IM_BYTE;
 
 	return IM_ERR_NONE;
 }
 
-int DATFileFormat::WriteImageData(void* data) {return 0;}
+int DATFileFormat::WriteImageData(void* data)
+{
+	imCounterTotal(this->counter, this->height, "Writing DAT...");
+
+	nbt_node* colors = nbt_find_by_name(this->data, "colors");
+	if(!colors)
+		return IM_ERR_DATA;
+
+	for(int row = 0; row < this->height; row++)
+	{
+		imFileLineBufferWrite(this, data, row, 0);
+		memcpy(colors->payload.tag_byte_array.data + this->width*(this->height-row-1), this->line_buffer, this->width);	//gotta write it upside-down
+		if (!imCounterInc(this->counter))
+		      return IM_ERR_COUNTER;
+	}
+
+	if(nbt_dump_file(this->node, this->fp, STRAT_GZIP) != NBT_OK)
+		return IM_ERR_ACCESS;
+
+	return IM_ERR_NONE;
+}
 
 int DATFormat::CanWrite(const char* compression, int color_mode, int data_type) const {return 0;}

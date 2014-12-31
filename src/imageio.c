@@ -1,6 +1,5 @@
 #include "header/imageio.h"
 #include "header/mainwindow.h"
-//#include "header/maputils.h"
 #include "header/datformat.hpp"
 
 #include <iup.h>
@@ -41,12 +40,18 @@ int open_image_file(Ihandle* ih)
 
 	//If the user didn't cancel out of the dialog, continue
 	if(IupGetInt(dlg,"STATUS") != 0)
+	{
+		IupDestroy(dlg);
 		return IUP_DEFAULT;
+	}
 
 	//If we have at least one file, continue
 	char* fnames = IupGetAttribute(dlg,"VALUE");
 	if(fnames == NULL)
+	{
+		IupDestroy(dlg);
 		return IUP_DEFAULT;
+	}
 
 	//Get the folder and all the files selected in that folder (if more than one file is selected)
 	//WARNING! Heavy use of pointer arithmetic. Future me might get confused by this
@@ -93,7 +98,7 @@ void parse_image_file(Ihandle* ih, const char* name, int num, int x, int y)
 	int err;
 	sprintf(msg,"Opening file %s... ", name);
 	log_console(msg);
-	imImage* img = imFileImageLoadBitmap(name, 0, &err);
+	imImage* img = imFileImageLoad(name, 0, &err);
 	if(err != IM_ERR_NONE)
 	{
 		sprintf(msg, "FAIL: Error %d\n", err);
@@ -159,4 +164,57 @@ Ihandle** grid_images(imImage** matrix, int size)
 		handle[i] = IupImageFromImImage(matrix[i]);
 
 	return handle;
+}
+
+int save_image_file(Ihandle* ih)
+{
+	//Making sure we actually have an image selected
+	if(!IupGetInt(list, "COUNT"))
+		return IUP_DEFAULT;
+
+	int val = IupGetInt(list,"VALUE");
+	if(val <= 0)
+		return IUP_DEFAULT;
+
+	LinkedList* ll = LL_get(images, val-1);
+	if(!ll)
+		return IUP_DEFAULT;
+
+	//Show the save file dialog
+	Ihandle* dlg = IupFileDlg();
+	IupSetAttributes(dlg,"EXTFILTER=\"All Supported Files|*.bmp;*.gif;*.jpg;*.jpeg;*.png;*.dat|Common Picture Files|*.bmp;*.gif;*.jpg;*.jpeg;*.png|"
+			"Minecraft NBT Map Format|*.dat|All Files|*.*|\", DIALOGTYPE=SAVE");
+	IupPopup(dlg,IUP_CURRENT,IUP_CURRENT);
+
+	//If the user didn't cancel out of the dialog, continue
+	if(IupGetInt(dlg,"STATUS") == -1)
+	{
+		IupDestroy(dlg);
+		return IUP_DEFAULT;
+	}
+
+	//If we have at least one file, continue
+	char* fname = IupGetAttribute(dlg,"VALUE");
+	if(fname == NULL)
+	{
+		IupDestroy(dlg);
+		return IUP_DEFAULT;
+	}
+
+	//Save the image to the file
+	char msg[128];
+	sprintf(msg, "Saving to %s... ", fname);
+	log_console(msg);
+
+	int err = imFileImageSave(fname, "DAT", ll->grid[0]) != IM_ERR_NONE;
+	if(err != IM_ERR_NONE)
+	{
+		sprintf(msg, "FAIL: Error %d\n", err);
+		log_console(msg);
+	}
+	else
+		log_console("OK!\n");
+
+	IupDestroy(dlg);
+	return IUP_DEFAULT;
 }

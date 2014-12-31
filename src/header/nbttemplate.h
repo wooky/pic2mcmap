@@ -3,6 +3,14 @@
 
 #include "nbt/nbt.h"
 
-nbt_node* get_nbt_from_data(void*);
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+nbt_node* create_nbt_template();
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* HEADER_NBTTEMPLATE_H_ */

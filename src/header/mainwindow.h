@@ -1,15 +1,21 @@
 #ifndef MAINWINDOW_H_LEL
 #define MAINWINDOW_H_LEL
 
+#include "linkedlist.h"
+
 #include <iup.h>
 #include <im.h>
 #include <im_image.h>
+
+#include <stddef.h>
 
 #define SEPARATOR (char*)1
 #define SHIFT 1
 #define CONTROL 2
 
 Ihandle* win;
+Ihandle* list;		//List of images opened
+LinkedList *images;	//Size can be accessed by IupGetInt(list,"COUNT")
 
 typedef struct {
 	const char* label;

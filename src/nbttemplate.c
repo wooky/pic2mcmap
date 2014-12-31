@@ -10,32 +10,32 @@
 #include "header/nbt/nbt.h"	//For the nbt_type enum
 
 #include <string.h>
+#include <stdlib.h>
 
 #define NBT_SIZE_COMPOUND(x) 3+(x)
 #define NBT_SIZE_BYTE(x) 4+(x)
 #define NBT_SIZE_SHORT(x) 5+(x)
 #define NBT_SIZE_INT(x) 7+(x)
 
-#define NBT_DATA_OFFSET NBT_SIZE_COMPOUND(0)+NBT_SIZE_COMPOUND(4)+NBT_SIZE_BYTE(5)+NBT_SIZE_BYTE(9)+NBT_SIZE_SHORT(6)+NBT_SIZE_SHORT(5)+NBT_SIZE_INT(7)+NBT_SIZE_INT(7)+NBT_SIZE_INT(7)
+#define NBT_DATA_OFFSET NBT_SIZE_COMPOUND(0)+NBT_SIZE_COMPOUND(4)+NBT_SIZE_BYTE(5)+NBT_SIZE_BYTE(9)+NBT_SIZE_SHORT(6)+NBT_SIZE_SHORT(5)+NBT_SIZE_INT(7)+NBT_SIZE_INT(7)+NBT_SIZE_INT(6)
 #define NBT_TOTAL_SIZE NBT_DATA_OFFSET+16384+2
 
-nbt_node* get_nbt_from_data(void* data)
-{
-	static unsigned char nbt_template[NBT_TOTAL_SIZE] = {
-		TAG_COMPOUND, 0, 0,																//root tag, unnamed
-			TAG_COMPOUND, 0, 4, 'd','a','t','a',											//map data tag
-				TAG_BYTE,		0,5,	's','c','a','l','e',					4,				//map scale - set it to maximum (4) because we don't want to allow combining maps
-				TAG_BYTE,		0,9,	'd','i','m','e','n','s','i','o','n',	1,				//put it in the nether for the lulz (and to avoid accidentally overwriting the data)
-				TAG_SHORT,		0,6,	'h','e','i','g','h','t',				0,128,			//map height of 128 (only possible value so far)
-				TAG_SHORT,		0,5,	'w','i','d','t','h',					0,128,			//map width of 128 (only possible value so far)
-				TAG_INT,		0,7,	'x','C','e','n','t','e','r',			255,255,255,0,	//some really big number
-				TAG_INT,		0,7,	'z','C','e','n','t','e','r',			255,255,255,0,	//some really big number
-				TAG_BYTE_ARRAY,	0,6,	'c','o','l','o','r','s',				0,0,64,0		//16384 entries (=64*256)
-	};
-			nbt_template[NBT_TOTAL_SIZE - 2] = TAG_INVALID;									//END map data tag
-		nbt_template[NBT_TOTAL_SIZE - 1] = TAG_INVALID;									//END root tag
+unsigned char nbt_template[NBT_TOTAL_SIZE] = {
+	TAG_COMPOUND, 0, 0,																//root tag, unnamed
+		TAG_COMPOUND, 0, 4, 'd','a','t','a',											//map data tag
+			TAG_BYTE,		0,5,	's','c','a','l','e',					4,				//map scale - set it to maximum (4) because we don't want to allow combining maps
+			TAG_BYTE,		0,9,	'd','i','m','e','n','s','i','o','n',	1,				//put it in the nether for the lulz (and to avoid accidentally overwriting the data)
+			TAG_SHORT,		0,6,	'h','e','i','g','h','t',				0,128,			//map height of 128 (only possible value so far)
+			TAG_SHORT,		0,5,	'w','i','d','t','h',					0,128,			//map width of 128 (only possible value so far)
+			TAG_INT,		0,7,	'x','C','e','n','t','e','r',			127,255,255,0,	//some really big (positive) number
+			TAG_INT,		0,7,	'z','C','e','n','t','e','r',			127,255,255,0,	//some really big (positive) number
+			TAG_BYTE_ARRAY,	0,6,	'c','o','l','o','r','s',				0,0,64,0		//16384 entries (=64*256)
+};
 
-	memcpy(nbt_template + NBT_DATA_OFFSET, data, 16384);
+nbt_node* create_nbt_template()
+{
+		nbt_template[NBT_TOTAL_SIZE - 2] = TAG_INVALID;									//END map data tag
+	nbt_template[NBT_TOTAL_SIZE - 1] = TAG_INVALID;									//END root tag
+
 	return nbt_parse(nbt_template, NBT_TOTAL_SIZE);
 }
-
