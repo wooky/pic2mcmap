@@ -275,13 +275,14 @@ int close_all(Ihandle* self)
 
 int save_nbt(Ihandle* self)
 {
-	save_file("Minecraft DAT Map Format|*.dat|", "DAT", ".dat");
+	save_file("Minecraft DAT Map Format|*.dat|", "DAT");
 	return IUP_DEFAULT;
 }
 
 int export_image(Ihandle* self)
 {
-	save_file("GIF Image File|*.gif|", "GIF", ".gif");
+	char types[][5] = {"GIF", "BMP"};
+	save_file("GIF Image File|*.gif|BMP Image File|*.bmp|", types);
 	return IUP_DEFAULT;
 }
 

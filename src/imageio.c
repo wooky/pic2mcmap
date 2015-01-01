@@ -165,7 +165,11 @@ Ihandle** grid_images(imImage** matrix, int size)
 	return handle;
 }
 
-void save_file(const char* filter, const char* type, const char* extension)
+//Save a file to a given list of formats
+//REQUIRES:	filter=the filter string given to the IupFileDlg
+//			type=the types corresponding to the filter. IMPORTANT: give it an array[size][5] (i.e. all extensions must be <=4 chars)
+//			size=size of the filter
+void save_file(const char* filter, const char* type)
 {
 	//Making sure we actually have an image selected
 	if(!IupGetInt(list, "COUNT"))
@@ -202,11 +206,13 @@ void save_file(const char* filter, const char* type, const char* extension)
 
 	//Save the image to the file
 	char msg[1024];
-	sprintf(msg, "Saving to %s%s... ", fname, extension);
+	char* ext = type + (IupGetInt(dlg, "FILTERUSED")-1)*5;
+
+	sprintf(msg, "Saving to %s.%s... ", fname, ext);
 	log_console(msg);
 
-	sprintf(msg, "%s%s", fname, extension);
-	int err = imFileImageSave(msg, type, ll->grid[0]) != IM_ERR_NONE;
+	sprintf(msg, "%s.%s", fname, ext);
+	int err = imFileImageSave(msg, ext, ll->grid[0]) != IM_ERR_NONE;
 	if(err != IM_ERR_NONE)
 	{
 		sprintf(msg, "FAIL: Error %d\n", err);
