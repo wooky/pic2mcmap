@@ -83,10 +83,11 @@ int open_image_file(Ihandle* ih)
 	}
 
 	//If there's just one file, parse it
-	if(temp[0] == NULL)
+	if(!temp[0])
 		parse_image_file(ih,fnames, 0, 0, 0);
 
 	IupDestroy(dlg);
+	set_menu_state();
 	return IUP_DEFAULT;
 }
 
@@ -166,34 +167,30 @@ Ihandle** grid_images(imImage** matrix, int size)
 }
 
 //Save a file to a given list of formats
-//REQUIRES:	filter=the filter string given to the IupFileDlg
-//			type=the types corresponding to the filter. IMPORTANT: give it an array[size][5] (i.e. all extensions must be <=4 chars)
-//			size=size of the filter
-void save_file(const char* filter, const char* type)
+int save_file(Ihandle* ih)
 {
 	//Making sure we actually have an image selected
 	if(!IupGetInt(list, "COUNT"))
-		return;
+		return IUP_DEFAULT;
 
 	int val = IupGetInt(list,"VALUE");
 	if(val <= 0)
-		return;
+		return IUP_DEFAULT;
 
 	LinkedList* ll = LL_get(images, val-1);
 	if(!ll)
-		return;
+		return IUP_DEFAULT;
 
 	//Show the save file dialog
 	Ihandle* dlg = IupFileDlg();
-	IupSetAttribute(dlg, "DIALOGTYPE", "SAVE");
-	IupSetAttribute(dlg, "EXTFILTER", filter);
+	IupSetAttributes(dlg, "DIALOGTYPE=SAVE, EXTFILTER=\"Minecraft Map Format (*.dat)|*.dat|GIF Image Format (*.gif)|*.gif|BMP Image Format (*.bmp)|*.bmp|\"");
 	IupPopup(dlg,IUP_CURRENT,IUP_CURRENT);
 
 	//If the user didn't cancel out of the dialog, continue
 	if(IupGetInt(dlg,"STATUS") == -1)
 	{
 		IupDestroy(dlg);
-		return;
+		return IUP_DEFAULT;
 	}
 
 	//If we have at least one file, continue
@@ -201,12 +198,14 @@ void save_file(const char* filter, const char* type)
 	if(fname == NULL)
 	{
 		IupDestroy(dlg);
-		return;
+		return IUP_DEFAULT;
 	}
 
 	//Save the image to the file
 	char msg[1024];
-	char* ext = type + (IupGetInt(dlg, "FILTERUSED")-1)*5;
+#define TYPE_SIZE 4
+	char types[][TYPE_SIZE] = {"DAT", "GIF", "BMP"};
+	char* ext = types[IupGetInt(dlg, "FILTERUSED") - 1];
 
 	sprintf(msg, "Saving to %s.%s... ", fname, ext);
 	log_console(msg);
@@ -222,4 +221,5 @@ void save_file(const char* filter, const char* type)
 		log_console("OK!\n");
 
 	IupDestroy(dlg);
+	return IUP_DEFAULT;
 }

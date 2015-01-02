@@ -22,11 +22,27 @@ Keyboard keyboard[] = {
 	{iup_XkeyCtrl(K_I),NULL},
 	{iup_XkeyCtrl(K_W),&close_image},
 	{iup_XkeyCtrl(iup_XkeyShift(K_W)),&close_all},
-	{iup_XkeyCtrl(K_S),&save_nbt},
-	{iup_XkeyCtrl(K_E),&export_image},
+	{iup_XkeyCtrl(K_S),&save_file},
 	{K_F1,&wiki},
 	{(int)NULL}
 };
+
+//Menus that might be modified
+Ihandle *menus_populated[5], *menus_selected[10];
+int nPopulated = 0, nSelected = 0;
+
+void set_menu_state()
+{
+	int i;
+	char* isPopulated = IupGetInt(list, "COUNT") ? "YES" : "NO";
+	char* isSelected = IupGetInt(list, "VALUE") ? "YES" : "NO";
+
+	for(i = 0; i < nPopulated; i++)
+		IupSetAttribute(menus_populated[i], "ACTIVE", isPopulated);
+
+	for(i = 0; i < nSelected; i++)
+		IupSetAttribute(menus_selected[i], "ACTIVE", isSelected);
+}
 
 Icallback k_any(Ihandle* ih, int c)
 {
@@ -82,6 +98,8 @@ int render_image(Ihandle *ih, char *text, int item, int state)
 		}
 		IupRefresh(imgmod);
 	}
+
+	set_menu_state();
 	return IUP_DEFAULT;
 }
 
@@ -90,28 +108,30 @@ Ihandle* create_mainwindow(int argc, char** argv)
 	//Create the menu
 	Ihandle* menu = IupMenu(
 		create_submenu("&File",(MenuItem[]){
-			{"&Open...\tCtrl+O",(Icallback)open_image_file},
-			{"&Close\tCtrl+W",(Icallback)close_image,1},
-			{"C&lose All\tCtrl+Shift+W",(Icallback)close_all,1},
+			{"&Open...\tCtrl+O", (Icallback)open_image_file, CONDITION_NONE},
+			{"&Close\tCtrl+W", (Icallback)close_image, CONDITION_SELECTED},
+			{"C&lose All\tCtrl+Shift+W", (Icallback)close_all, CONDITION_POPULATED},
 			{SEPARATOR},
-			{"&Save to Map...\tCtrl+S",(Icallback)save_nbt,1},
-			{"&Export to Image...\tCtrl+E",(Icallback)export_image,1},
+			{"&Export Map Matrix As...\tCtrl+S", (Icallback)save_file, CONDITION_SELECTED},
+			{"&Save to Cluster...\tCtrl+Alt+S", NULL, CONDITION_SELECTED},
 			{SEPARATOR},
-			{"E&xit", (Icallback)IupExitLoop},
+			{"E&xit", (Icallback)IupExitLoop, CONDITION_NONE},
 			{NULL}
 		}),
 		create_submenu("&Map",(MenuItem[]){
-			{"Import Map &Cluster...\tCtrl+I",NULL},
-			{"Export to &World...\tCtrl+Alt+S",NULL,1},
+			{"Import Maps as &Matrix...\tCtrl+M", NULL, CONDITION_NONE},
+			{"Import from &World...\tCtrl+I", NULL, CONDITION_NONE},
+			{SEPARATOR},
+			{"Export to &World...\tCtrl+Alt+S", NULL, CONDITION_SELECTED},
 			{NULL}
 		}),
 		create_submenu("&Tools",(MenuItem[]){
-			{"&Options",NULL},
+			{"&Options", NULL, CONDITION_NONE},
 			{NULL}
 		}),
 		create_submenu("&Help",(MenuItem[]){
-			{"&Wiki\tF1",(Icallback)wiki},
-			{"&About",NULL},
+			{"&Wiki\tF1", (Icallback)wiki, CONDITION_NONE},
+			{"&About", NULL, CONDITION_NONE},
 			{NULL}
 		}),
 		NULL
@@ -160,8 +180,8 @@ Ihandle* create_mainwindow(int argc, char** argv)
 	//Create the window, put everything inside, and show it
 	win = IupDialog(vbox);
 	IupSetAttributes(win,"TITLE=\"Pic2MCMap - Picture to Minecraft map format converter\", MINSIZE=800x600");
-	IupSetAttributeHandle(win,"MENU",menu);
-	IupSetCallback(win,"K_ANY",k_any);
+	IupSetAttributeHandle(win, "MENU",menu);
+	IupSetCallback(win, "K_ANY", k_any);
 	IupSetCallback(win, "DROPFILES_CB", parse_image_file);
 	IupShow(win);
 
@@ -192,13 +212,24 @@ Ihandle* create_submenu(const char* label, MenuItem* items)
 	for(i = 0; items[i].label ; i++)
 	{
 		if(items[i].label == SEPARATOR)
-			IupAppend(m,IupSeparator());
+			IupAppend(m, IupSeparator());
 		else
 		{
-			Ihandle* e = IupItem(items[i].label,NULL);
-			IupSetCallback(e,"ACTION",items[i].cb);
-			if(items[i].disabled)
-				IupSetAttribute(e,"ACTIVE","NO");
+			Ihandle* e = IupItem(items[i].label, NULL);
+			IupSetCallback(e, "ACTION", items[i].cb);
+			switch(items[i].condition)
+			{
+			case CONDITION_NONE:
+				break;
+			case CONDITION_POPULATED:
+				IupSetAttribute(e, "ACTIVE", "NO");
+				menus_populated[nPopulated++] = e;
+				break;
+			case CONDITION_SELECTED:
+				IupSetAttribute(e, "ACTIVE", "NO");
+				menus_selected[nSelected++] = e;
+				break;
+			}
 			IupAppend(m,e);
 		}
 	}
@@ -249,6 +280,7 @@ int close_image(Ihandle* self)
 	//Delete the linked list element associated with the image being deleted
 	LL_remove(&images, index);
 
+	set_menu_state();
 	return IUP_DEFAULT;
 }
 
@@ -270,19 +302,7 @@ int close_all(Ihandle* self)
 	//Purge the linked list
 	LL_purge(&images);
 
-	return IUP_DEFAULT;
-}
-
-int save_nbt(Ihandle* self)
-{
-	save_file("Minecraft DAT Map Format|*.dat|", "DAT");
-	return IUP_DEFAULT;
-}
-
-int export_image(Ihandle* self)
-{
-	char types[][5] = {"GIF", "BMP"};
-	save_file("GIF Image File|*.gif|BMP Image File|*.bmp|", types);
+	set_menu_state();
 	return IUP_DEFAULT;
 }
 

@@ -10,17 +10,16 @@
 #include <stddef.h>
 
 #define SEPARATOR (char*)1
-#define SHIFT 1
-#define CONTROL 2
 
-Ihandle* win;
+Ihandle* win;		//The window
 Ihandle* list;		//List of images opened
 LinkedList *images;	//Size can be accessed by IupGetInt(list,"COUNT")
 
+typedef enum {CONDITION_NONE, CONDITION_POPULATED, CONDITION_SELECTED} ActivationCondition;
 typedef struct {
 	const char* label;
 	Icallback cb;
-	char disabled;
+	ActivationCondition condition;
 } MenuItem;
 
 typedef int (*FunctionCallback)();
@@ -29,6 +28,7 @@ typedef struct {
 	FunctionCallback cb;
 } Keyboard;
 
+void set_menu_state();
 int wiki(Ihandle*);
 Icallback k_all(Ihandle*, int);
 int render_image(Ihandle*, char*, int, int);
@@ -39,7 +39,5 @@ void log_console(const char*);
 void add_image(imImage*);
 int close_image(Ihandle*);
 int close_all(Ihandle*);
-int save_nbt(Ihandle*);
-int export_image(Ihandle*);
 
 #endif /* MAINWINDOW_H_LEL */
