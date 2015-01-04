@@ -1,6 +1,7 @@
 #include "header/mainwindow.h"
 #include "header/imageio.h"
 #include "header/linkedlist.h"
+#include "header/statusbar.h"
 
 #include <iup.h>
 #include <im_image.h>
@@ -15,6 +16,19 @@ Ihandle* console;		//Logging console
 Ihandle* placeholder;	//This is needed for some reason
 Ihandle* preview;		//Previewed image
 Ihandle* imgmod;		//Modified image (grid)
+
+//TODO: test, please remove
+int test(Ihandle* ih)
+{
+	if(!status_bar_init("test test test test test test test test test test test test test test test test test"))
+		status_bar_done();
+	return IUP_DEFAULT;
+}
+int test2(Ihandle* ih)
+{
+	status_bar_inc();
+	return IUP_DEFAULT;
+}
 
 //Keyboard shortcuts. Format: {shortcut, callback}
 Keyboard keyboard[] = {
@@ -118,8 +132,8 @@ Ihandle* create_mainwindow(int argc, char** argv)
 			{NULL}
 		}),
 		create_submenu("&Map",(MenuItem[]){
-			{"&Import from World...\tCtrl+I", NULL, CONDITION_NONE},
-			{"I&mport as Matrix...\tCtrl+Shift+I", NULL, CONDITION_NONE},
+			{"&Import from World...\tCtrl+I", (Icallback)test, CONDITION_NONE},
+			{"I&mport as Matrix...\tCtrl+Shift+I", (Icallback)test2, CONDITION_NONE},
 			{SEPARATOR},
 			{"&Export to World...\tCtrl+E", NULL, CONDITION_SELECTED},
 			{"E&xport as Matrix...\tCtrl+Shift+E", NULL, CONDITION_SELECTED},
@@ -172,10 +186,13 @@ Ihandle* create_mainwindow(int argc, char** argv)
 		NULL
 	);
 
+	//Status bar
+	Ihandle* statusbar = status_bar_setup();
+
 	//Divider to resize the console
 	Ihandle* sizer = IupSplit(hbox, console);
 	IupSetAttributes(sizer, "ORIENTATION=HORIZONTAL, VALUE=1000");
-	Ihandle* vbox = IupVbox(sizer,NULL);
+	Ihandle* vbox = IupVbox(sizer, statusbar, NULL);
 
 	//Create the window, put everything inside, and show it
 	win = IupDialog(vbox);

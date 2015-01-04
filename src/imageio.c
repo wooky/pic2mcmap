@@ -1,6 +1,7 @@
 #include "header/imageio.h"
 #include "header/mainwindow.h"
 #include "header/datformat.hpp"
+#include "header/statusbar.h"
 
 #include <iup.h>
 
@@ -99,6 +100,7 @@ void parse_image_file(Ihandle* ih, const char* name, int num, int x, int y)
 	int err;
 	sprintf(msg,"Opening file %s... ", name);
 	log_console(msg);
+	status_bar_init(msg);
 	imImage* img = imFileImageLoadBitmap(name, 0, &err);
 	if(err != IM_ERR_NONE)
 	{
@@ -137,6 +139,7 @@ imImage* get_image_thumbnail(imImage* orig)
 imImage** split_to_grid(imImage* orig, unsigned char* rows, unsigned char* cols)
 {
 	unsigned char nCols = orig->width/128, nRows = orig->height/128, i,j;
+	status_bar_count(nCols * nRows);
 
 	*cols = nCols;
 	*rows = nRows;
@@ -149,8 +152,9 @@ imImage** split_to_grid(imImage* orig, unsigned char* rows, unsigned char* cols)
 		{
 			//                               When the image is top-down, crop the top; otherwise, from the "bottom" (which is actually the top)
 			imProcessCrop(orig, temp, j*128, imColorModeIsTopDown(orig->color_space) ? i*128 : (nRows-i-1)*128);
-
 			matrix[i*nCols + j] = mapify(temp);
+
+			status_bar_inc();
 		}
 	}
 	imImageDestroy(temp);
@@ -166,6 +170,7 @@ Ihandle** grid_images(imImage** matrix, int size)
 	for(i = 0; i < size; i++)
 		handle[i] = IupImageFromImImage(matrix[i]);
 
+	status_bar_done();
 	return handle;
 }
 
