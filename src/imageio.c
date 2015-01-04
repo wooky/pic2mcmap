@@ -220,7 +220,7 @@ int save_file(Ihandle* ih)
 	{
 		for(j = 0; j < cols; j++)
 		{
-			imProcessAddMargins(ll->grid[i*cols + j], big, 128*j, 128*i);
+			imProcessAddMargins(ll->grid[i*cols + j], big, 128*j, 128*(rows-i-1));
 		}
 	}
 
