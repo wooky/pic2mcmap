@@ -98,6 +98,7 @@ const unsigned char DATPalette[DATPALETTE_SIZE][3] = {
 		{14,14,21},{18,17,26},{21,20,31},{11,10,16},
 		{79,1,0},{96,1,0},{112,2,0},{59,1,0}
 };
+unsigned char TransparencyIndex = 0;
 
 #define DATCOMPRESSION_SIZE 1
 static const char* DATCompression[DATCOMPRESSION_SIZE] = {
@@ -108,12 +109,8 @@ static const char* DATCompression[DATCOMPRESSION_SIZE] = {
 //Uses square Eucledian distance
 //We're using this function rather than the one given by IM because that one sucks for some reason
 #define square(x) (x)*(x)
-extern "C" unsigned char nearest_color_index(unsigned char r, unsigned char g, unsigned char b, unsigned char a)
+extern "C" unsigned char nearest_color_index(unsigned char r, unsigned char g, unsigned char b)
 {
-	//If the image is too transparent, return transparent
-	if(a < 128)
-		return 0;
-
 	short index = -1, i;
 	unsigned int diff = -1;
 
@@ -147,7 +144,12 @@ extern "C" imImage* mapify(imImage* orig)
 	//Is it a map? Is there an alpha layer? How many layers in total?
 	char isMap = orig->color_space & IM_MAP;
 	int alphaLayer = orig->depth;
+
+	//Is there an alpha layer or index?
 	short hasAlpha = orig->has_alpha;	//Can't be a char because has_alpha can be 256
+	int transparencyIndexType = IM_BYTE, transparencyIndexSize = 1;
+	const void* transparentIndexAddress = imImageGetAttribute(orig, "TransparencyIndex", &transparencyIndexType, &transparencyIndexSize);
+	unsigned char transparencyIndex = transparentIndexAddress ? *((unsigned char*)(transparentIndexAddress)) : 0;
 
 	//Get the closest index for each pixel and save it to the new image
 	int i, ppp = orig->count;
@@ -155,10 +157,14 @@ extern "C" imImage* mapify(imImage* orig)
 
 	for(i = 0; i < ppp; i++)
 	{
-		unsigned char r,g,b;
+		//Get the alpha, and if it's low enough, put in a transparent color
+		if((hasAlpha && data[i+ppp*alphaLayer] < 128) || (transparentIndexAddress && data[i] == transparencyIndex))
+		{
+			nova[i] = 0;
+			continue;
+		}
 
-		//Get the alpha, if it has any
-		unsigned char a = hasAlpha ? data[i+ppp*alphaLayer] : 255;
+		unsigned char r,g,b;
 
 		//If it's a map format, the colors are based on the palette
 		if(isMap)
@@ -170,7 +176,12 @@ extern "C" imImage* mapify(imImage* orig)
 			g = data[i+ppp];
 			b = data[i+ppp*2];
 		}
-		nova[i] = nearest_color_index(r, g, b, a);
+
+		//Get the pixel value and see if it's transparent
+		unsigned char nearest_color = nearest_color_index(r, g, b);
+		nova[i] = nearest_color;
+		if(!nearest_color)
+			nova[ppp + i] = 255;
 	}
 
 	return mod;
@@ -268,8 +279,10 @@ int DATFileFormat::ReadImageInfo(int index)
 	//Set the palette
 	memcpy(this->palette, DATPaletteMap, 256*sizeof(long));
 
-	//Tell everyone that this image is a DAT file
-	AttribTable()->SetInteger("DAT", IM_BYTE, 1);
+	//Tell everyone that this image is a DAT file and set the transparency index
+	imAttribTable* attrib = AttribTable();
+	attrib->SetInteger("DAT", IM_BYTE, 1);
+	attrib->Set("TransparencyIndex", IM_BYTE, 1, &TransparencyIndex);
 
 	return IM_ERR_NONE;
 }
