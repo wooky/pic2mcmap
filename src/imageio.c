@@ -183,7 +183,7 @@ int save_file(Ihandle* ih)
 
 	//Show the save file dialog
 	Ihandle* dlg = IupFileDlg();
-	IupSetAttributes(dlg, "DIALOGTYPE=SAVE, EXTFILTER=\"Minecraft Map Format (*.dat)|*.dat|GIF Image Format (*.gif)|*.gif|BMP Image Format (*.bmp)|*.bmp|\"");
+	IupSetAttributes(dlg, "DIALOGTYPE=SAVE, EXTFILTER=\"GIF Image Format (*.gif)|*.gif|BMP Image Format (*.bmp)|*.bmp|\"");
 	IupPopup(dlg,IUP_CURRENT,IUP_CURRENT);
 
 	//If the user didn't cancel out of the dialog, continue
@@ -201,17 +201,29 @@ int save_file(Ihandle* ih)
 		return IUP_DEFAULT;
 	}
 
-	//Save the image to the file
+	//Get the format in which the image will be saved
 	char msg[1024];
 #define TYPE_SIZE 4
-	char types[][TYPE_SIZE] = {"DAT", "GIF", "BMP"};
+	char types[][TYPE_SIZE] = {"GIF", "BMP"};
 	char* ext = types[IupGetInt(dlg, "FILTERUSED") - 1];
-
 	sprintf(msg, "Saving to %s.%s... ", fname, ext);
 	log_console(msg);
 
+	//Combine the small images into one big image
+	int cols = ll->cols, rows = ll->rows;
+	imImage* big = imImageCreateBased(ll->grid[0], cols*128, rows*128, -1, -1);
+	int i, j;
+	for(i = 0; i < rows; i++)
+	{
+		for(j = 0; j < cols; j++)
+		{
+			imProcessAddMargins(ll->grid[i*cols + j], big, 128*j, 128*i);
+		}
+	}
+
+	//Actually save the image
 	sprintf(msg, "%s.%s", fname, ext);
-	int err = imFileImageSave(msg, ext, ll->grid[0]) != IM_ERR_NONE;
+	int err = imFileImageSave(msg, ext, big) != IM_ERR_NONE;
 	if(err != IM_ERR_NONE)
 	{
 		sprintf(msg, "FAIL: Error %d\n", err);
@@ -220,6 +232,7 @@ int save_file(Ihandle* ih)
 	else
 		log_console("OK!\n");
 
+	imImageDestroy(big);
 	IupDestroy(dlg);
 	return IUP_DEFAULT;
 }

@@ -113,16 +113,16 @@ Ihandle* create_mainwindow(int argc, char** argv)
 			{"C&lose All\tCtrl+Shift+W", (Icallback)close_all, CONDITION_POPULATED},
 			{SEPARATOR},
 			{"&Export Map Matrix As...\tCtrl+S", (Icallback)save_file, CONDITION_SELECTED},
-			{"&Save to Cluster...\tCtrl+Alt+S", NULL, CONDITION_SELECTED},
 			{SEPARATOR},
 			{"E&xit", (Icallback)IupExitLoop, CONDITION_NONE},
 			{NULL}
 		}),
 		create_submenu("&Map",(MenuItem[]){
-			{"Import Maps as &Matrix...\tCtrl+M", NULL, CONDITION_NONE},
-			{"Import from &World...\tCtrl+I", NULL, CONDITION_NONE},
+			{"&Import from World...\tCtrl+I", NULL, CONDITION_NONE},
+			{"I&mport as Matrix...\tCtrl+Shift+I", NULL, CONDITION_NONE},
 			{SEPARATOR},
-			{"Export to &World...\tCtrl+Alt+S", NULL, CONDITION_SELECTED},
+			{"&Export to World...\tCtrl+E", NULL, CONDITION_SELECTED},
+			{"E&xport as Matrix...\tCtrl+Shift+E", NULL, CONDITION_SELECTED},
 			{NULL}
 		}),
 		create_submenu("&Tools",(MenuItem[]){
