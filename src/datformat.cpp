@@ -98,7 +98,6 @@ const unsigned char DATPalette[DATPALETTE_SIZE][3] = {
 		{14,14,21},{18,17,26},{21,20,31},{11,10,16},
 		{79,1,0},{96,1,0},{112,2,0},{59,1,0}
 };
-unsigned char TransparencyIndex = 0;
 
 #define DATCOMPRESSION_SIZE 1
 static const char* DATCompression[DATCOMPRESSION_SIZE] = {
@@ -140,6 +139,9 @@ extern "C" imImage* mapify(imImage* orig)
 
 	//Set the palette
 	mod->palette = DATPaletteMap;
+
+	//Set the transparent color
+	imImageSetAttribInteger(mod, "TransparencyIndex", IM_BYTE, 0);
 
 	//Is it a map? Is there an alpha layer? How many layers in total?
 	char isMap = orig->color_space & IM_MAP;
@@ -268,6 +270,11 @@ void* DATFileFormat::Handle(int index)
 
 int DATFileFormat::ReadImageInfo(int index)
 {
+	//Init the attribute table
+	imAttribTable* attrib = AttribTable();
+	attrib->RemoveAll();
+	imFileSetBaseAttributes(this);
+
 	//Set the image type
 	this->user_color_mode = this->file_color_mode = IM_MAP | IM_TOPDOWN;
 	this->user_data_type = this->file_data_type = IM_BYTE;
@@ -280,9 +287,8 @@ int DATFileFormat::ReadImageInfo(int index)
 	memcpy(this->palette, DATPaletteMap, 256*sizeof(long));
 
 	//Tell everyone that this image is a DAT file and set the transparency index
-	imAttribTable* attrib = AttribTable();
 	attrib->SetInteger("DAT", IM_BYTE, 1);
-	attrib->Set("TransparencyIndex", IM_BYTE, 1, &TransparencyIndex);
+	attrib->SetInteger("TransparencyIndex", IM_BYTE, 0);
 
 	return IM_ERR_NONE;
 }

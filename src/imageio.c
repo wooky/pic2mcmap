@@ -217,12 +217,8 @@ int save_file(Ihandle* ih)
 	imImage* big = imImageCreateBased(ll->grid[0], cols*128, rows*128, -1, -1);
 	int i, j;
 	for(i = 0; i < rows; i++)
-	{
 		for(j = 0; j < cols; j++)
-		{
 			imProcessAddMargins(ll->grid[i*cols + j], big, 128*j, 128*(rows-i-1));
-		}
-	}
 
 	//Actually save the image
 	sprintf(msg, "%s.%s", fname, ext);

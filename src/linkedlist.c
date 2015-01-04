@@ -76,6 +76,8 @@ LinkedList* LL_insert(LinkedList** loc, imImage* image, int index)
 	img->contents = image;
 	img->thumbnail = get_image_thumbnail(image);
 	img->grid = split_to_grid(image, &img->rows, &img->cols);
+	int one = 1;
+	void* asdf = imImageGetAttribute(img->grid[0], "TransparencyIndex", IM_BYTE, &one);
 
 	img->iContents = IupImageFromImImage(image);
 	img->iThumbnail = IupImageFromImImage(img->thumbnail);
