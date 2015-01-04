@@ -344,4 +344,8 @@ int DATFileFormat::WriteImageData(void* data)
 	return IM_ERR_NONE;
 }
 
-int DATFormat::CanWrite(const char* compression, int color_mode, int data_type) const {return 0;}
+int DATFormat::CanWrite(const char* compression, int color_mode, int data_type) const
+{
+	//Whatever
+	return IM_ERR_NONE;
+}
