@@ -128,6 +128,8 @@ extern "C" unsigned char nearest_color_index(unsigned char r, unsigned char g, u
 	return index;
 }
 
+//I would like to use imConvertColorSpace instead, however that function doesn't handle transparencies, which is quite critical for this program.
+//Thus, I have to write my own function.
 extern "C" imImage* mapify(imImage* orig)
 {
 	//If the original file is already a DAT file, just dupe the given image and return it
