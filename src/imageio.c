@@ -37,8 +37,8 @@ int open_image_file(Ihandle* ih)
 {
 	//Show the open file dialog
 	Ihandle* dlg = IupFileDlg();
-	IupSetAttributes(dlg,"EXTFILTER=\"All Supported Files|*.bmp;*.gif;*.jpg;*.jpeg;*.png;*.dat|Common Picture Files|*.bmp;*.gif;*.jpg;*.jpeg;*.png|"
-			"Minecraft NBT Map Format|*.dat|All Files|*.*|\", MULTIPLEFILES=YES");
+	IupSetAttributes(dlg,"EXTFILTER=\"All Supported Files (*.bmp;*.gif;*.jpg;*.jpeg;*.png;*.dat)|*.bmp;*.gif;*.jpg;*.jpeg;*.png;*.dat|Common Picture Files (*.bmp;*.gif;*.jpg;*.jpeg;*.png)|"
+			"*.bmp;*.gif;*.jpg;*.jpeg;*.png|Minecraft NBT Map Format (*.dat)|*.dat|All Files (*.*)|*.*|\", MULTIPLEFILES=YES");
 	IupPopup(dlg,IUP_CURRENT,IUP_CURRENT);
 
 	//If the user didn't cancel out of the dialog, continue
@@ -201,7 +201,7 @@ int save_file(Ihandle* ih)
 
 	//Show the save file dialog
 	Ihandle* dlg = IupFileDlg();
-	IupSetAttributes(dlg, "DIALOGTYPE=SAVE, EXTFILTER=\"PNG (*.png)|*.png|GIF (*.gif)|*.gif|Bitmap Image (*.bmp)|*.bmp|\"");
+	IupSetAttributes(dlg, "DIALOGTYPE=SAVE, EXTFILTER=\"GIF (*.gif)|*.gif|PNG (bugged, don't use) (*.png)|*.png|Bitmap Image (*.bmp)|*.bmp|\"");
 	IupPopup(dlg,IUP_CURRENT,IUP_CURRENT);
 
 	//If the user didn't cancel out of the dialog, continue
@@ -222,7 +222,7 @@ int save_file(Ihandle* ih)
 	//Get the format in which the image will be saved
 	char msg[1024];
 #define TYPE_SIZE 4
-	char types[][TYPE_SIZE] = {"PNG", "GIF", "BMP"};
+	char types[][TYPE_SIZE] = {"GIF", "PNG", "BMP"};
 	char* ext = types[IupGetInt(dlg, "FILTERUSED") - 1];
 	sprintf(msg, "Saving to %s.%s... ", fname, ext);
 	status_bar_init(msg);
