@@ -11,9 +11,7 @@
 //Throw an error
 void throw_error(int i, int index)
 {
-	char buf[64];
-	sprintf(buf, "[ERROR] Cannot access element %d, only %d elements exist!\n", index, i);
-	log_console(buf);
+	printf("[ERROR] Cannot access element %d, only %d elements exist!\n", index, i);
 }
 
 //Clean inside the linked list and free the memory
@@ -76,8 +74,6 @@ LinkedList* LL_insert(LinkedList** loc, imImage* image, int index)
 	img->contents = image;
 	img->thumbnail = get_image_thumbnail(image);
 	img->grid = split_to_grid(image, &img->rows, &img->cols);
-	int one = 1;
-	void* asdf = imImageGetAttribute(img->grid[0], "TransparencyIndex", IM_BYTE, &one);
 
 	img->iContents = IupImageFromImImage(image);
 	img->iThumbnail = IupImageFromImImage(img->thumbnail);

@@ -2,6 +2,7 @@
 #include "header/imageio.h"
 #include "header/linkedlist.h"
 #include "header/statusbar.h"
+#include "header/bufmsg.h"
 
 #include <iup.h>
 #include <im_image.h>
@@ -12,23 +13,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static Ihandle* console;		//Logging console
 static Ihandle* placeholder;	//This is needed for some reason
 static Ihandle* preview;		//Previewed image
 static Ihandle* imgmod;		//Modified image (grid)
-
-//TODO: test, please remove
-int test(Ihandle* ih)
-{
-	status_bar_done();
-	status_bar_init("test test test test test test test test test test test test test test test test test");
-	return IUP_DEFAULT;
-}
-int test2(Ihandle* ih)
-{
-	status_bar_inc();
-	return IUP_DEFAULT;
-}
 
 //Keyboard shortcuts. Format: {shortcut, callback}
 static Keyboard keyboard[] = {
@@ -103,11 +90,7 @@ int render_image(Ihandle *ih, char *text, int item, int state)
 		{
 			Ihandle* tinyimg = IupLabel(NULL);
 			IupSetAttributeHandle(tinyimg, "IMAGE", ll->iGrid[i]);
-			if(IupAppend(imgmod, tinyimg) == NULL)
-			{
-				sprintf(buf, "Failed to attach image piece %d\n", i);
-				log_console(buf);
-			}
+			IupAppend(imgmod, tinyimg);
 			IupMap(tinyimg);
 		}
 		IupRefresh(imgmod);
@@ -126,14 +109,14 @@ Ihandle* create_mainwindow(int argc, char** argv)
 			{"&Close\tCtrl+W", (Icallback)close_image, CONDITION_SELECTED},
 			{"C&lose All\tCtrl+Shift+W", (Icallback)close_all, CONDITION_POPULATED},
 			{SEPARATOR},
-			{"&Export Map Matrix As...\tCtrl+S", (Icallback)save_file, CONDITION_SELECTED},
+			{"&Save Map Matrix As Image...\tCtrl+S", (Icallback)save_file, CONDITION_SELECTED},
 			{SEPARATOR},
 			{"E&xit", (Icallback)IupExitLoop, CONDITION_NONE},
 			{NULL}
 		}),
 		create_submenu("&Map",(MenuItem[]){
-			{"&Import from World...\tCtrl+I", (Icallback)test, CONDITION_NONE},
-			{"I&mport as Matrix...\tCtrl+Shift+I", (Icallback)test2, CONDITION_NONE},
+			{"&Import from World...\tCtrl+I", NULL, CONDITION_NONE},
+			{"I&mport as Matrix...\tCtrl+Shift+I", NULL, CONDITION_NONE},
 			{SEPARATOR},
 			{"&Export to World...\tCtrl+E", NULL, CONDITION_SELECTED},
 			{"E&xport as Matrix...\tCtrl+Shift+E", NULL, CONDITION_SELECTED},
@@ -150,11 +133,6 @@ Ihandle* create_mainwindow(int argc, char** argv)
 		}),
 		NULL
 	);
-
-	//Status console
-	console = IupText(NULL);
-	IupSetAttributes(console,"MULTILINE=YES, READONLY=YES, MINSIZE=x85, EXPAND=YES, WORDWRAP=YES, FONT=\"Courier, 9\","
-			"APPENDNEWLINE=NO, VALUE=\"Welcome to Pic2MCMap! Select an image or map to open through the File menu.\n\"");
 
 	//List of images
 	list = IupList(NULL);
@@ -189,10 +167,7 @@ Ihandle* create_mainwindow(int argc, char** argv)
 	//Status bar
 	Ihandle* statusbar = status_bar_setup();
 
-	//Divider to resize the console
-	Ihandle* sizer = IupSplit(hbox, console);
-	IupSetAttributes(sizer, "ORIENTATION=HORIZONTAL, VALUE=1000");
-	Ihandle* vbox = IupVbox(sizer, statusbar, NULL);
+	Ihandle* vbox = IupVbox(hbox, statusbar, NULL);
 
 	//Create the window, put everything inside, and show it
 	win = IupDialog(vbox);
@@ -203,9 +178,16 @@ Ihandle* create_mainwindow(int argc, char** argv)
 	IupShow(win);
 
 	//Now try to open a few files given by the command line
-	int i;
-	for(i = 1; i < argc; i++)
-		parse_image_file(NULL, argv[i], 0, 0, 0);
+	if(argc > 1)
+	{
+		buf_msg_init("Error Opening File(s)", "The following error(s) occurred while trying to open files:");
+
+		int i;
+		for(i = 1; i < argc; i++)
+			parse_image_file(NULL, argv[i], 0, 0, 0);
+
+		buf_msg_show();
+	}
 
 	return win;
 }
@@ -252,11 +234,6 @@ Ihandle* create_submenu(const char* label, MenuItem* items)
 	}
 
 	return IupSubmenu(label,m);
-}
-
-void log_console(const char* msg)
-{
-	IupSetAttribute(console,"APPEND",msg);
 }
 
 void add_image(imImage* addr)

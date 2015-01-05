@@ -2,6 +2,7 @@
 #include "header/mainwindow.h"
 #include "header/datformat.hpp"
 #include "header/statusbar.h"
+#include "header/bufmsg.h"
 
 #include <iup.h>
 
@@ -54,6 +55,9 @@ int open_image_file(Ihandle* ih)
 		return IUP_DEFAULT;
 	}
 
+	//Init the error dialog
+	buf_msg_init("Error Opening File(s)", "The following error(s) occurred while trying to open files:");
+
 	//Get the folder and all the files selected in that folder (if more than one file is selected)
 	//WARNING! Heavy use of pointer arithmetic. Future me might get confused by this
 	char temp[1024] = "", *fnamesFill, *tempFill;
@@ -87,6 +91,7 @@ int open_image_file(Ihandle* ih)
 	if(!temp[0])
 		parse_image_file(ih,fnames, 0, 0, 0);
 
+	buf_msg_show();
 	IupDestroy(dlg);
 	set_menu_state();
 	return IUP_DEFAULT;
@@ -99,13 +104,12 @@ void parse_image_file(Ihandle* ih, const char* name, int num, int x, int y)
 	char msg[128];
 	int err;
 	sprintf(msg,"Opening file %s... ", name);
-	log_console(msg);
 	status_bar_init(msg);
 	imImage* img = imFileImageLoadBitmap(name, 0, &err);
 	if(err != IM_ERR_NONE)
 	{
-		sprintf(msg, "FAIL: Error %d\n", err);
-		log_console(msg);
+		sprintf(msg, "Cannot open %s: %s (%d)", name, imIupErrorMessage(err), err);
+		buf_msg_put(msg);
 		return;
 	}
 
@@ -117,12 +121,10 @@ void parse_image_file(Ihandle* ih, const char* name, int num, int x, int y)
 		imImageReshape(temp, closest128(img->width), closest128(img->height));
 		imProcessResize(img, temp, RESIZE_ORDER);
 		imImageDestroy(img);
-		sprintf(msg, "Image resized to %dX%d... ", temp->width, temp->height);
-		log_console(msg);
 		add_image(temp);
 	}
 
-	log_console("OK!\n");
+	//log_console("OK!\n");
 }
 
 imImage* get_image_thumbnail(imImage* orig)
@@ -191,7 +193,7 @@ int save_file(Ihandle* ih)
 
 	//Show the save file dialog
 	Ihandle* dlg = IupFileDlg();
-	IupSetAttributes(dlg, "DIALOGTYPE=SAVE, EXTFILTER=\"GIF Image Format (*.gif)|*.gif|BMP Image Format (*.bmp)|*.bmp|\"");
+	IupSetAttributes(dlg, "DIALOGTYPE=SAVE, EXTFILTER=\"PNG (*.png)|*.png|GIF (*.gif)|*.gif|Bitmap Image (*.bmp)|*.bmp|\"");
 	IupPopup(dlg,IUP_CURRENT,IUP_CURRENT);
 
 	//If the user didn't cancel out of the dialog, continue
@@ -212,31 +214,63 @@ int save_file(Ihandle* ih)
 	//Get the format in which the image will be saved
 	char msg[1024];
 #define TYPE_SIZE 4
-	char types[][TYPE_SIZE] = {"GIF", "BMP"};
+	char types[][TYPE_SIZE] = {"PNG", "GIF", "BMP"};
 	char* ext = types[IupGetInt(dlg, "FILTERUSED") - 1];
 	sprintf(msg, "Saving to %s.%s... ", fname, ext);
-	log_console(msg);
+	status_bar_init(msg);
 
 	//Combine the small images into one big image
 	int cols = ll->cols, rows = ll->rows;
+	status_bar_count(cols*rows);
 	imImage* big = imImageCreateBased(ll->grid[0], cols*128, rows*128, -1, -1);
 	int i, j;
 	for(i = 0; i < rows; i++)
 		for(j = 0; j < cols; j++)
+		{
 			imProcessAddMargins(ll->grid[i*cols + j], big, 128*j, 128*(rows-i-1));
+			status_bar_inc();
+		}
 
 	//Actually save the image
 	sprintf(msg, "%s.%s", fname, ext);
 	int err = imFileImageSave(msg, ext, big) != IM_ERR_NONE;
 	if(err != IM_ERR_NONE)
 	{
-		sprintf(msg, "FAIL: Error %d\n", err);
-		log_console(msg);
+		sprintf(msg, "The following error occurred while saving to %s: %s (%d)\n", fname, imIupErrorMessage(err), err);
+		show_warning("Error Saving File", msg);
 	}
-	else
-		log_console("OK!\n");
 
+	status_bar_done();
 	imImageDestroy(big);
 	IupDestroy(dlg);
 	return IUP_DEFAULT;
+}
+
+const char* imIupErrorMessage(int error)
+{
+	char *msg;
+	switch (error)
+	{
+	case IM_ERR_OPEN:
+		msg = "Error Opening File.";
+		break;
+	case IM_ERR_MEM:
+		msg = "Insufficient memory.";
+		break;
+	case IM_ERR_ACCESS:
+		msg = "Error Accessing File.";
+		break;
+	case IM_ERR_DATA:
+		msg = "Image type not supported.";
+		break;
+	case IM_ERR_FORMAT:
+		msg = "Invalid Format.";
+		break;
+	case IM_ERR_COMPRESS:
+		msg = "Invalid or unsupported compression.";
+		break;
+	default:
+		msg = "Unknown Error.";
+	}
+	return msg;
 }

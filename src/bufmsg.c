@@ -39,24 +39,25 @@ void buf_msg_put(char* err)
 	sprintf(buf, "%s\n%s", buf, err);
 }
 
-void buf_msg_show(Ihandle* parent)
+void buf_msg_show()
 {
 	if(done)
 		return;
 
 	if(triggered)
-	{
-		Ihandle* dlg = IupMessageDlg();
-		IupSetAttribute(dlg, "DIALOGTYPE", "WARNING");
-		IupSetAttributeHandle(dlg, "PARENTDIALOG", parent);
-		IupSetAttribute(dlg, "TITLE", ttl);
-		IupSetAttribute(dlg, "VALUE", buf);
-		IupPopup(dlg, IUP_CURRENT, IUP_CURRENT);
-		IupDestroy(dlg);
-		triggered = 0;
-	}
+		show_warning(ttl, buf);
 
 	free(ttl);
 	free(buf);
 	done = 1;
+}
+
+void show_warning(const char* title, const char* message)
+{
+	Ihandle* dlg = IupMessageDlg();
+	IupSetAttribute(dlg, "DIALOGTYPE", "WARNING");
+	IupSetAttribute(dlg, "TITLE", title);
+	IupSetAttribute(dlg, "VALUE", message);
+	IupPopup(dlg, IUP_CURRENT, IUP_CURRENT);
+	IupDestroy(dlg);
 }

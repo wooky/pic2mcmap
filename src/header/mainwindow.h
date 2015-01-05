@@ -35,7 +35,6 @@ int render_image(Ihandle*, char*, int, int);
 Ihandle* create_mainwindow(int, char**);
 void cleanup();
 Ihandle* create_submenu(const char*, MenuItem*);
-void log_console(const char*);
 void add_image(imImage*);
 int close_image(Ihandle*);
 int close_all(Ihandle*);

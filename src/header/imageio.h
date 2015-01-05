@@ -13,4 +13,6 @@ Ihandle** grid_images(imImage**, int);
 
 int save_file(Ihandle* ih);
 
+const char* imIupErrorMessage(int);
+
 #endif /* READIMAGE_H_ */
