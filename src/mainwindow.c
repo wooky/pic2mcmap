@@ -12,16 +12,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-Ihandle* console;		//Logging console
-Ihandle* placeholder;	//This is needed for some reason
-Ihandle* preview;		//Previewed image
-Ihandle* imgmod;		//Modified image (grid)
+static Ihandle* console;		//Logging console
+static Ihandle* placeholder;	//This is needed for some reason
+static Ihandle* preview;		//Previewed image
+static Ihandle* imgmod;		//Modified image (grid)
 
 //TODO: test, please remove
 int test(Ihandle* ih)
 {
-	if(!status_bar_init("test test test test test test test test test test test test test test test test test"))
-		status_bar_done();
+	status_bar_done();
+	status_bar_init("test test test test test test test test test test test test test test test test test");
 	return IUP_DEFAULT;
 }
 int test2(Ihandle* ih)
@@ -31,7 +31,7 @@ int test2(Ihandle* ih)
 }
 
 //Keyboard shortcuts. Format: {shortcut, callback}
-Keyboard keyboard[] = {
+static Keyboard keyboard[] = {
 	{iup_XkeyCtrl(K_O),&open_image_file},
 	{iup_XkeyCtrl(K_I),NULL},
 	{iup_XkeyCtrl(K_W),&close_image},
@@ -42,8 +42,8 @@ Keyboard keyboard[] = {
 };
 
 //Menus that might be modified
-Ihandle *menus_populated[5], *menus_selected[10];
-int nPopulated = 0, nSelected = 0;
+static Ihandle *menus_populated[5], *menus_selected[10];
+static int nPopulated = 0, nSelected = 0;
 
 void set_menu_state()
 {

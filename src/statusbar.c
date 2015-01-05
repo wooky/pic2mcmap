@@ -4,9 +4,9 @@
 
 #include <stdio.h>
 
-unsigned char done = 1;
+static char done = 1;
 
-Ihandle *status_msg, *status_prog, *status_hbox;
+static Ihandle *status_msg, *status_prog;
 
 //Set up the status bar to display on the main window
 Ihandle* status_bar_setup()
@@ -16,16 +16,15 @@ Ihandle* status_bar_setup()
 	status_prog = IupProgressBar();
 	IupSetAttribute(status_prog, "SIZE", "0x7");
 
-	status_hbox = IupHbox(status_prog, status_msg);
-	return status_hbox;
+	return IupHbox(status_prog, status_msg, NULL);
 }
 
-char status_bar_init(const char* description)
+void status_bar_init(const char* description)
 {
 	//Return if not done
 	//Hopefully will never happen
 	if(!done)
-		return 0;
+		return;
 
 	//We're using this now
 	done = 0;
@@ -39,9 +38,8 @@ char status_bar_init(const char* description)
 
 	//Update
 	IupRefresh(status_prog);
+	IupRefresh(status_msg);
 	IupLoopStep();
-
-	return 1;
 }
 
 void status_bar_count(int iterations)

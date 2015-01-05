@@ -16,7 +16,7 @@
 
 #define TRANSPARENT_MAP 0xFF00FF	//A color to represent transparency (i.e. eye-bleeding magenta)
 #define DATPALETTE_SIZE_EFFECTIVE 140
-long DATPaletteMap[256] = {
+static long DATPaletteMap[256] = {
 		TRANSPARENT_MAP, TRANSPARENT_MAP, TRANSPARENT_MAP, TRANSPARENT_MAP,	//First 4 are transparent
 		0x597D27, 0x6D9930, 0x7FB238, 0x435E1D,
 		0xAEA473, 0xD5C98C, 0xF7E9A3, 0x827B56,
@@ -60,7 +60,7 @@ long DATPaletteMap[256] = {
 //Converted into arrays of {r,g,b}
 #define DATPALETTE_SIZE 144
 #define TRANSPARENT {255,0,255}	//Invalid pattern just cause
-const unsigned char DATPalette[DATPALETTE_SIZE][3] = {
+static const unsigned char DATPalette[DATPALETTE_SIZE][3] = {
 		TRANSPARENT, TRANSPARENT, TRANSPARENT, TRANSPARENT,
 		{89,125,39},{109,153,48},{127,178,56},{67,94,29},
 		{174,164,115},{213,201,140},{247,233,163},{130,123,86},
