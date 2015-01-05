@@ -20,6 +20,7 @@
 
 //Put these into the Options dialog, not hard-coded
 #define RESIZE_ORDER 0
+#define NORMAL_OP -1
 
 int closest128(int x)
 {
@@ -80,7 +81,7 @@ int open_image_file(Ihandle* ih)
 				#endif
 			} else {
 				//Parse the filename
-				parse_image_file(ih, temp, 0, 0, 0);
+				parse_image_file(ih, temp, NORMAL_OP, 0, 0);
 			}
 
 			fnames = fnamesFill + 1;
@@ -89,7 +90,7 @@ int open_image_file(Ihandle* ih)
 
 	//If there's just one file, parse it
 	if(!temp[0])
-		parse_image_file(ih,fnames, 0, 0, 0);
+		parse_image_file(ih,fnames, NORMAL_OP, 0, 0);
 
 	buf_msg_show();
 	IupDestroy(dlg);
@@ -99,8 +100,13 @@ int open_image_file(Ihandle* ih)
 
 //Parse the given filename
 //3 last extra arguments to satisfy DROPFILES_CB, because I'm too lazy to write yet another function to call this one
+//Pass NORMAL_OP to num for normal operation, otherwise weird stuff might happen
 void parse_image_file(Ihandle* ih, const char* name, int num, int x, int y)
 {
+	//Initialize the buffered message if we're called "in an unusual way"
+	if(num != NORMAL_OP)
+		buf_msg_init("Error Opening File(s)", "The following error(s) occurred while trying to open files:");
+
 	char msg[128];
 	int err;
 	sprintf(msg,"Opening file %s... ", name);
@@ -124,7 +130,9 @@ void parse_image_file(Ihandle* ih, const char* name, int num, int x, int y)
 		add_image(temp);
 	}
 
-	//log_console("OK!\n");
+	//Show errors, again, if this is called unusually
+	if(num == 0)
+		buf_msg_show();
 }
 
 imImage* get_image_thumbnail(imImage* orig)
@@ -236,7 +244,7 @@ int save_file(Ihandle* ih)
 	int err = imFileImageSave(msg, ext, big) != IM_ERR_NONE;
 	if(err != IM_ERR_NONE)
 	{
-		sprintf(msg, "The following error occurred while saving to %s: %s (%d)\n", fname, imIupErrorMessage(err), err);
+		sprintf(msg, "The following error occurred while saving to %s.%s: %s (%d)\n", fname, ext, imIupErrorMessage(err), err);
 		show_warning("Error Saving File", msg);
 	}
 

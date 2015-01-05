@@ -1,4 +1,3 @@
-* Make a status bar (instead of a console)
 * Save to map cluster
 * Open map cluster
 * Read from a config file

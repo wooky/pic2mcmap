@@ -178,16 +178,9 @@ Ihandle* create_mainwindow(int argc, char** argv)
 	IupShow(win);
 
 	//Now try to open a few files given by the command line
-	if(argc > 1)
-	{
-		buf_msg_init("Error Opening File(s)", "The following error(s) occurred while trying to open files:");
-
-		int i;
-		for(i = 1; i < argc; i++)
-			parse_image_file(NULL, argv[i], 0, 0, 0);
-
-		buf_msg_show();
-	}
+	int i;
+	for(i = 1; i < argc; i++)
+		parse_image_file(NULL, argv[i], argc-i-1, 0, 0);
 
 	return win;
 }
