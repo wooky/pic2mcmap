@@ -30,6 +30,7 @@ typedef struct {
 
 void set_menu_state();
 int wiki(Ihandle*);
+int about(Ihandle*);
 Icallback k_all(Ihandle*, int);
 int render_image(Ihandle*, char*, int, int);
 Ihandle* create_mainwindow(int, char**);

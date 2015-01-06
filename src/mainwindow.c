@@ -128,7 +128,7 @@ Ihandle* create_mainwindow(int argc, char** argv)
 		}),
 		create_submenu("&Help",(MenuItem[]){
 			{"&Wiki\tF1", (Icallback)wiki, CONDITION_NONE},
-			{"&About", NULL, CONDITION_NONE},
+			{"&About", (Icallback)about, CONDITION_NONE},
 			{NULL}
 		}),
 		NULL
@@ -245,6 +245,29 @@ int wiki(Ihandle* self)
 {
 #define WIKI_URL "https://github.com/wooky/pic2mcmap/wiki"
 	IupHelp(WIKI_URL);
+	return IUP_DEFAULT;
+}
+
+//Display the about page
+int about(Ihandle* self)
+{
+#define C "\xa9"
+#define VERSION "0.1 alpha"
+	IupMessage("About",
+			"Pic2MCMap Minecraft map format converter\n"
+			"Version " VERSION "\n"
+			"Built on " __DATE__ "\n"
+			"Copyright "C"2014-2015 Yakov Lipkovich\n"
+			"Licensed under the BSD license\n"
+			"---------------------------------------------------------------\n"
+			"Additional libraries:\n"
+			" * IUP Portable User Interface; "C"1994-2014 Tecgraf, PUC-Rio\n"
+			" * IM Digital Imaging; "C"1994-2014 Tecgraf, PUC-Rio\n"
+			" * cNBT NBT File Parser; "C"Lukas Niederbremer and Clark Gaebel\n"
+			"---------------------------------------------------------------\n"
+			"github.com/wooky/pic2mcmap"
+	);
+
 	return IUP_DEFAULT;
 }
 
