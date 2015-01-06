@@ -267,6 +267,8 @@ int about(Ihandle* self)
 			"---------------------------------------------------------------\n"
 			"github.com/wooky/pic2mcmap"
 	);
+#undef C
+#undef VERSION
 
 	return IUP_DEFAULT;
 }
