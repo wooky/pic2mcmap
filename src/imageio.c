@@ -21,7 +21,6 @@
 
 //Put these into the Options dialog, not hard-coded
 #define RESIZE_ORDER 0
-#define NORMAL_OP -1
 
 int closest128(int x)
 {
@@ -57,43 +56,43 @@ int open_image_file(Ihandle* ih)
 		return IUP_DEFAULT;
 	}
 
-	//Init the error dialog
-	buf_msg_init("Error Opening File(s)", "The following error(s) occurred while trying to open files:");
+	//Get the length of fnames, for later usage
+	int flength = strlen(fnames);
 
-	//Get the folder and all the files selected in that folder (if more than one file is selected)
-	//WARNING! Heavy use of pointer arithmetic. Future me might get confused by this
-	char temp[1024] = "", *fnamesFill, *tempFill;
-	for(fnamesFill = fnames, tempFill = temp; *fnamesFill; fnamesFill++)
+	//We will be splitting the path into tokens, which are separated by "|"
+#define NORMAL_OP 1
+#define FINAL_OP 0
+	fnames = strtok(fnames, "|");	//fnames gets altered anyways by strtok(), so we may as well reuse it
+
+	//If the lengths of the strings are exactly the same, this means that we only have one file. So process it immediately.
+	if(strlen(fnames) == flength)
+		parse_image_file(ih, fnames, FINAL_OP, 0, 0);
+
+	//Otherwise, go through every filename, concatenate it to the path, and parse it
+	else
 	{
-		if(*fnamesFill == '|')
+		char path[1024], dir[512];
+
+		//Copy the directory, noting the path separator
+		sprintf(dir, "%s"
+#ifdef WIN32
+				"\\"
+#else
+				"/"
+#endif
+		, fnames);
+
+		//We need a token right now so that we know the first filename
+		fnames = strtok(NULL, "|");
+
+		while(fnames)
 		{
-			//Replace the | with a null character for easier string copying
-			*fnamesFill = '\0';
-			strcpy(tempFill,fnames);
-
-			//Special case if this is the first string - that's our folder
-			if(temp == tempFill)
-			{
-				tempFill += fnamesFill - fnames + 1;
-				#ifdef WIN32
-					*(tempFill - 1) = '\\';
-				#else
-					*(tempFill - 1) = '/';
-				#endif
-			} else {
-				//Parse the filename
-				parse_image_file(ih, temp, NORMAL_OP, 0, 0);
-			}
-
-			fnames = fnamesFill + 1;
+			sprintf(path, "%s%s", dir, fnames);
+			fnames = strtok(NULL, "|");
+			parse_image_file(ih, path, fnames ? NORMAL_OP : FINAL_OP, 0, 0);
 		}
 	}
 
-	//If there's just one file, parse it
-	if(!temp[0])
-		parse_image_file(ih,fnames, NORMAL_OP, 0, 0);
-
-	buf_msg_show();
 	IupDestroy(dlg);
 	set_menu_state();
 	return IUP_DEFAULT;
@@ -104,9 +103,8 @@ int open_image_file(Ihandle* ih)
 //Pass NORMAL_OP to num for normal operation, otherwise weird stuff might happen
 void parse_image_file(Ihandle* ih, const char* name, int num, int x, int y)
 {
-	//Initialize the buffered message if we're called "in an unusual way"
-	if(num != NORMAL_OP)
-		buf_msg_init("Error Opening File(s)", "The following error(s) occurred while trying to open files:");
+	//Initialize the buffered message
+	buf_msg_init("Error Opening File(s)", "The following error(s) occurred while trying to open files:");
 
 	char msg[128];
 	int err;
@@ -131,7 +129,7 @@ void parse_image_file(Ihandle* ih, const char* name, int num, int x, int y)
 		add_image(temp);
 	}
 
-	//Show errors, again, if this is called unusually
+	//Show errors, if any, but only if this is the last file being processed
 	if(num == 0)
 		buf_msg_show();
 }
