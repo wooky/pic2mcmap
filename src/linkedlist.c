@@ -6,7 +6,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include "header/imageio.h"
+#include "header/imageutil.h"
 
 //Throw an error
 void throw_error(int i, int index)

@@ -8,7 +8,7 @@
 extern "C" {
 #endif
 
-imImage* mapify(imImage*);
+extern long DATPaletteMap[256];
 void formatRegisterDAT();
 
 #ifdef __cplusplus

@@ -3,6 +3,7 @@
 #include "header/datformat.hpp"
 #include "header/statusbar.h"
 #include "header/bufmsg.h"
+#include "header/imageutil.h"
 
 #include <iup.h>
 
@@ -135,55 +136,6 @@ void parse_image_file(Ihandle* ih, const char* name, int num, int x, int y)
 		buf_msg_show();
 }
 
-imImage* get_image_thumbnail(imImage* orig)
-{
-	if(orig->width == 128 && orig->height == 128)
-		return imImageDuplicate(orig);
-
-	imImage *temp = imImageClone(orig);
-	imImageReshape(temp, 128, 128);
-	imProcessResize(orig, temp, RESIZE_ORDER);
-	return temp;
-}
-
-imImage** split_to_grid(imImage* orig, unsigned char* rows, unsigned char* cols)
-{
-	unsigned char nCols = orig->width/128, nRows = orig->height/128, i,j;
-	status_bar_count(nCols * nRows);
-
-	*cols = nCols;
-	*rows = nRows;
-	imImage** matrix = malloc(nCols * nRows * sizeof(imImage*));
-	imImage* temp = imImageCreateBased(orig, 128, 128, -1, -1);
-
-	for(i = 0; i < nRows; i++)
-	{
-		for(j = 0; j < nCols; j++)
-		{
-			//                               When the image is top-down, crop the top; otherwise, from the "bottom" (which is actually the top)
-			imProcessCrop(orig, temp, j*128, imColorModeIsTopDown(orig->color_space) ? i*128 : (nRows-i-1)*128);
-			matrix[i*nCols + j] = mapify(temp);
-
-			status_bar_inc();
-		}
-	}
-	imImageDestroy(temp);
-
-	return matrix;
-}
-
-Ihandle** grid_images(imImage** matrix, int size)
-{
-	Ihandle** handle = malloc(size * sizeof(Ihandle*));
-	int i;
-
-	for(i = 0; i < size; i++)
-		handle[i] = IupImageFromImImage(matrix[i]);
-
-	status_bar_done();
-	return handle;
-}
-
 //Save a file to a given list of formats
 int save_file(Ihandle* ih)
 {
@@ -252,33 +204,4 @@ int save_file(Ihandle* ih)
 	imImageDestroy(big);
 	IupDestroy(dlg);
 	return IUP_DEFAULT;
-}
-
-const char* imIupErrorMessage(int error)
-{
-	char *msg;
-	switch (error)
-	{
-	case IM_ERR_OPEN:
-		msg = "Error Opening File.";
-		break;
-	case IM_ERR_MEM:
-		msg = "Insufficient memory.";
-		break;
-	case IM_ERR_ACCESS:
-		msg = "Error Accessing File.";
-		break;
-	case IM_ERR_DATA:
-		msg = "Image type not supported.";
-		break;
-	case IM_ERR_FORMAT:
-		msg = "Invalid Format.";
-		break;
-	case IM_ERR_COMPRESS:
-		msg = "Invalid or unsupported compression.";
-		break;
-	default:
-		msg = "Unknown Error.";
-	}
-	return msg;
 }
