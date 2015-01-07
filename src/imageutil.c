@@ -190,7 +190,6 @@ Ihandle** grid_images(imImage** matrix, int size)
 	for(i = 0; i < size; i++)
 		handle[i] = IupImageFromImImage(matrix[i]);
 
-	status_bar_done();
 	return handle;
 }
 

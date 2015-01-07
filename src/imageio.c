@@ -108,17 +108,15 @@ void parse_image_file(Ihandle* ih, const char* name, int num, int x, int y)
 
 	char msg[128];
 	int err;
-	sprintf(msg,"Opening file %s... ", name);
+	sprintf(msg,"Opening file %s...", name);
 	status_bar_init(msg);
 	imImage* img = imFileImageLoadBitmap(name, 0, &err);
 	if(err != IM_ERR_NONE)
 	{
 		sprintf(msg, "Cannot open %s: %s (%d)", name, imIupErrorMessage(err), err);
 		buf_msg_put(msg);
-		return;
 	}
-
-	if(img->width % 128 == 0 && img->height % 128 == 0)
+	else if(img->width % 128 == 0 && img->height % 128 == 0)
 		add_image(img);
 	else
 	{
@@ -128,6 +126,8 @@ void parse_image_file(Ihandle* ih, const char* name, int num, int x, int y)
 		imImageDestroy(img);
 		add_image(temp);
 	}
+
+	status_bar_done();
 
 	//Show errors, if any, but only if this is the last file being processed
 	if(num == 0)
