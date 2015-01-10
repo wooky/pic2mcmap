@@ -46,7 +46,7 @@ void set_menu_state()
 		IupSetAttribute(menus_selected[i], "ACTIVE", isSelected);
 }
 
-Icallback k_any(Ihandle* ih, int c)
+int k_any(Ihandle* ih, int c)
 {
 	int i;
 	for(i = 0; keyboard[i].key; i++)
@@ -55,12 +55,12 @@ Icallback k_any(Ihandle* ih, int c)
 		{
 			if(keyboard[i].cb != NULL)	//TEMPORARY, all keyboard shortcuts will be mapped eventually
 			{
-				return (Icallback)(keyboard[i].cb)();
+				return (keyboard[i].cb)();
 			}
 		}
 	}
 
-	return (Icallback)IUP_DEFAULT;
+	return IUP_DEFAULT;
 }
 
 int render_image(Ihandle *ih, char *text, int item, int state)
@@ -174,8 +174,8 @@ Ihandle* create_mainwindow(int argc, char** argv)
 	win = IupDialog(vbox);
 	IupSetAttributes(win,"TITLE=\"Pic2MCMap - Picture to Minecraft map format converter\", MINSIZE=800x600");
 	IupSetAttributeHandle(win, "MENU",menu);
-	IupSetCallback(win, "K_ANY", k_any);
-	IupSetCallback(win, "DROPFILES_CB", parse_image_file);
+	IupSetCallback(win, "K_ANY", (Icallback)k_any);
+	IupSetCallback(win, "DROPFILES_CB", (Icallback)parse_image_file);
 	IupShow(win);
 
 	//Now try to open a few files given by the command line

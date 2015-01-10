@@ -7,7 +7,7 @@
 #include <sys/stat.h>
 
 //static char directory[1024] = "", format[128] = "map_%d.dat";
-static Ihandle *dir, *frmt, *result, *count;
+static Ihandle *dir, *frmt, *result, *count, *dlg;
 static int nOfImages;
 
 char _is_directory(const char* path)
@@ -24,12 +24,20 @@ int _set_status(Ihandle* ih)
 		sprintf(buf, "\"%s\" is not a valid folder", path);
 	else
 	{
-		char start_file[256], end_file[256];
 		char* format = IupGetAttribute(frmt, "VALUE");
-		int from = IupGetInt(count, "VALUE");
-		int start = sprintf(start_file, format, from);
-		int end = sprintf(end_file, format, from+nOfImages);
-		sprintf(buf, "Maps will be saved to files %s"PATHSEP"%s to %s"PATHSEP"%s", path, (start<0)?start_file:format, path, (end<0)?end_file:format);
+
+		//Ensure that the format is in a proper format, i.e. has a %d
+		char* pos = strstr(format, "%");
+		if(!pos || *(pos+1) != 'd')
+			sprintf(buf, "The format \"%s\" is invalid as it does not contain a %%d", format);
+		else
+		{
+			char start_file[256], end_file[256];
+			int from = IupGetInt(count, "VALUE");
+			sprintf(start_file, format, from);
+			sprintf(end_file, format, from+nOfImages);
+			sprintf(buf, "Maps will be saved to files %s"PATHSEP"%s to %s"PATHSEP"%s", path, start_file, path, end_file);
+		}
 	}
 
 	IupSetAttribute(result, "TITLE", buf);
@@ -43,7 +51,7 @@ int export_dialog_folder(Ihandle* ih)
 
 	//Directory textbox
 	dir = IupText(NULL);
-	//IupSetAttribute(dir, "VALUE", directory);
+	IupSetAttribute(dir, "VALUE", "");//directory);
 	IupSetAttributes(dir, "VISIBLECOLUMNS=30, NC=1024");
 	IupSetCallback(dir, "VALUECHANGED_CB", (Icallback)_set_status);
 
@@ -68,7 +76,11 @@ int export_dialog_folder(Ihandle* ih)
 	IupSetAttribute(result, "EXPAND", "HORIZONTAL");
 	_set_status(NULL);
 
-	Ihandle* dlg = IupSetAttributes(IupDialog(
+	//Cancel button
+	Ihandle* cancel = IupButton("Cancel", NULL);
+	IupSetCallback(cancel, "ACTION", (Icallback)IupExitLoop);
+
+	dlg = IupSetAttributes(IupDialog(
 			IupVbox(
 					IupSetAttributes(IupHbox(
 							IupLabel("Save to folder: "),
@@ -86,11 +98,13 @@ int export_dialog_folder(Ihandle* ih)
 					IupSetAttributes(IupFrame(
 							result
 					), "TITLE=Result"),
+					cancel,
 					NULL
 			)
 	), "TITLE=\"Export as Matrix\", DIALOGFRAME=YES, HIDETASKBAR=YES");
-	IupPopup(dlg, IUP_CURRENT, IUP_CURRENT);
+	IupSetAttributeHandle(dlg, "DEFAULTESC", cancel);
 
+	IupPopup(dlg, IUP_CURRENT, IUP_CURRENT);
 	IupDestroy(dlg);
 	return IUP_DEFAULT;
 }

@@ -16,14 +16,9 @@ void on_crash()
 			"an image it didn't like.\nWould you like to submit an issue to the project's GitHub page?\", BUTTONS=YESNO, DIALOGTYPE=ERROR");
 	IupPopup(dead, IUP_CURRENT, IUP_CURRENT);
 	if(*IupGetAttribute(dead, "BUTTONRESPONSE") == '1')
-#define ISSUES_PAGE "https://github.com/wooky/pic2mcmap/issues"
-#ifdef WIN32
-		system("start "ISSUES_PAGE);
-#else
-		system("firefox "ISSUES_PAGE);	//TODO: really bad
-#endif
+		IupHelp("https://github.com/wooky/pic2mcmap/issues");
 
-	abort();
+	exit(-1);
 }
 
 int main(int argc, char** argv)
