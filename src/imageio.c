@@ -74,13 +74,7 @@ int open_image_file(Ihandle* ih)
 		char path[1024], dir[512];
 
 		//Copy the directory, noting the path separator
-		sprintf(dir, "%s"
-#ifdef WIN32
-				"\\"
-#else
-				"/"
-#endif
-		, fnames);
+		sprintf(dir, "%s"PATHSEP, fnames);
 
 		//We need a token right now so that we know the first filename
 		fnames = strtok(NULL, "|");

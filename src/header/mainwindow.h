@@ -28,6 +28,13 @@ typedef struct {
 	FunctionCallback cb;
 } Keyboard;
 
+//Path separator
+#ifdef _WIN32
+#define PATHSEP "\\"
+#else
+#define PATHSEP "/"
+#endif
+
 void set_menu_state();
 int wiki(Ihandle*);
 int about(Ihandle*);

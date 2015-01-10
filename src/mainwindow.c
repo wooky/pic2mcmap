@@ -3,6 +3,7 @@
 #include "header/linkedlist.h"
 #include "header/statusbar.h"
 #include "header/bufmsg.h"
+#include "header/exportdialog.h"
 
 #include <iup.h>
 #include <im_image.h>
@@ -15,16 +16,16 @@
 
 static Ihandle* placeholder;	//This is needed for some reason
 static Ihandle* preview;		//Previewed image
-static Ihandle* imgmod;		//Modified image (grid)
+static Ihandle* imgmod;			//Modified image (grid)
 
 //Keyboard shortcuts. Format: {shortcut, callback}
 static Keyboard keyboard[] = {
-	{iup_XkeyCtrl(K_O),&open_image_file},
-	{iup_XkeyCtrl(K_I),NULL},
-	{iup_XkeyCtrl(K_W),&close_image},
-	{iup_XkeyCtrl(iup_XkeyShift(K_W)),&close_all},
-	{iup_XkeyCtrl(K_S),&save_file},
-	{K_F1,&wiki},
+	{iup_XkeyCtrl(K_O),					&open_image_file},
+	{iup_XkeyCtrl(K_W),					&close_image},
+	{iup_XkeyCtrl(iup_XkeyShift(K_W)),	&close_all},
+	{iup_XkeyCtrl(K_S),					&save_file},
+	{iup_XkeyCtrl(iup_XkeyShift(K_E)),	&export_dialog_folder},
+	{K_F1,								&wiki},
 	{(int)NULL}
 };
 
@@ -119,7 +120,7 @@ Ihandle* create_mainwindow(int argc, char** argv)
 			{"I&mport as Matrix...\tCtrl+Shift+I", NULL, CONDITION_NONE},
 			{SEPARATOR},
 			{"&Export to World...\tCtrl+E", NULL, CONDITION_SELECTED},
-			{"E&xport as Matrix...\tCtrl+Shift+E", NULL, CONDITION_SELECTED},
+			{"E&xport as Matrix...\tCtrl+Shift+E", (Icallback)export_dialog_folder, CONDITION_SELECTED},
 			{NULL}
 		}),
 		create_submenu("&Tools",(MenuItem[]){
