@@ -1,7 +1,6 @@
 #ifndef HEADER_DATFORMAT_HPP_
 #define HEADER_DATFORMAT_HPP_
 
-#include "nbt/nbt.h"
 #include "nbttemplate.h"
 
 #include <im_file.h>

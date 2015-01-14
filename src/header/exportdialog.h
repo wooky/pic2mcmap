@@ -3,10 +3,7 @@
 
 #include "mainwindow.h"
 
-//#include <iup.h>
-
-#include <stdio.h>
-#include <string.h>
+#include <limits.h>
 #include <sys/stat.h>
 
 int export_dialog_folder(Ihandle*);

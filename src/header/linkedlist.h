@@ -1,11 +1,12 @@
 #ifndef SRC_HEADER_LINKEDLIST_H_
 #define SRC_HEADER_LINKEDLIST_H_
 
-#include <iup.h>
-#include <im.h>
-#include <im_image.h>
+#include "imageutil.h"
 
-#include <limits.h>
+#include <iupim.h>
+
+#include <stdlib.h>
+#include <stdio.h>
 
 #define LL_APPEND INT_MAX
 

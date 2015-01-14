@@ -1,14 +1,4 @@
 #include "header/imageio.h"
-#include "header/mainwindow.h"
-#include "header/datformat.hpp"
-#include "header/statusbar.h"
-#include "header/bufmsg.h"
-#include "header/imageutil.h"
-
-#include <im_process_loc.h>
-
-#include <string.h>
-#include <stdio.h>
 
 //Put these into the Options dialog, not hard-coded
 #define RESIZE_ORDER 0

@@ -7,10 +7,6 @@
 //Here it goes!
 
 #include "header/nbttemplate.h"
-#include "header/nbt/nbt.h"	//For the nbt_type enum
-
-#include <string.h>
-#include <stdlib.h>
 
 #define NBT_SIZE_COMPOUND(x) 3+(x)
 #define NBT_SIZE_BYTE(x) 4+(x)

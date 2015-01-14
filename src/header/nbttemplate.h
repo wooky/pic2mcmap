@@ -3,6 +3,9 @@
 
 #include "nbt/nbt.h"
 
+#include <string.h>
+#include <stdlib.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif

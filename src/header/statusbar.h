@@ -3,6 +3,8 @@
 
 #include <iup.h>
 
+#include <stdio.h>
+
 Ihandle* status_bar_setup();
 void status_bar_init(const char*);
 void status_bar_count(int);

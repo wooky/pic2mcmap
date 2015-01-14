@@ -1,9 +1,5 @@
 #include "header/statusbar.h"
 
-#include <iup.h>
-
-#include <stdio.h>
-
 static char done = 1;
 
 static Ihandle *status_msg, *status_prog;

@@ -1,12 +1,4 @@
 #include "header/imageutil.h"
-#include "header/statusbar.h"
-#include "header/datformat.hpp"
-
-#include <im_process_loc.h>
-#include <im_util.h>
-#include <iupim.h>
-
-#include <stdlib.h>
 
 //Put these into the Options dialog, not hard-coded
 #define RESIZE_ORDER 0
