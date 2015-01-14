@@ -1,18 +1,7 @@
 //Oh joy it's a C++ file in a C project. Nothing could possibly go wrong here
 #include "header/datformat.hpp"
 
-#include "header/nbt/nbt.h"
-#include "header/nbttemplate.h"
-
-#include <im_image.h>
-#include <im_format.h>
-#include <im_counter.h>
-#include <im_palette.h>
-#include <im_util.h>
-
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
+#include <im_format.h>	//Can't shove this into the .hpp file here
 
 #define TRANSPARENT_MAP 0xFF00FF	//A color to represent transparency (i.e. eye-bleeding magenta)
 #define DATPALETTE_SIZE_EFFECTIVE 140
@@ -118,7 +107,7 @@ int DATFileFormat::New(const char* file_name)
 		return IM_ERR_OPEN;
 
 	//Get a template NBT file
-	if(!(this->node = create_nbt_template()) || !(this->data = nbt_find_by_name(this->node, "data")))
+	if(!(this->node = nbt_template_create()) || !(this->data = nbt_find_by_name(this->node, "data")))
 		return IM_ERR_MEM;
 
 	this->image_count = 1;

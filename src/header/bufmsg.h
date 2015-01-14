@@ -3,6 +3,10 @@
 
 #include <iup.h>
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 void buf_msg_init(const char* title, const char* description);
 void buf_msg_put(char*);
 void buf_msg_show();

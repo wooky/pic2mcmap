@@ -5,9 +5,9 @@
 #include <im.h>
 #include <im_image.h>
 
-imImage* get_image_thumbnail(imImage*);
-imImage** split_to_grid(imImage*, unsigned char*, unsigned char*);
-Ihandle** grid_images(imImage**, int);
+imImage* util_get_thumbnail(imImage*);
+imImage** util_split_to_grid(imImage*, unsigned char*, unsigned char*);
+Ihandle** util_grid_images(imImage**, int);
 
 const char* imIupErrorMessage(int);
 

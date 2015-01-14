@@ -1,23 +1,16 @@
 #include "header/exportdialog.h"
-#include "header/mainwindow.h"
-
-#include <iup.h>
-
-#include <stdio.h>
-#include <string.h>
-#include <sys/stat.h>
 
 //static char directory[1024] = "", format[128] = "map_%d.dat";
 static Ihandle *dir, *frmt, *result, *count, *export, *dlg;
 static int nOfImages;
 
-char _is_directory(const char* path)
+static char _is_directory(const char* path)
 {
 	static struct stat s;
 	return (stat(path, &s) == 0 && (s.st_mode & S_IFDIR)) ? 1 : 0;
 }
 
-int _set_status(Ihandle* ih)
+static int _set_status(Ihandle* ih)
 {
 	static char buf[2048];
 	const char* path = IupGetAttribute(dir, "VALUE");
@@ -46,7 +39,7 @@ int _set_status(Ihandle* ih)
 	return IUP_DEFAULT;
 }
 
-int _browse_folder(Ihandle* ih)
+static int _browse_folder(Ihandle* ih)
 {
 	Ihandle* derp = IupFileDlg();
 	IupSetAttribute(derp, "DIALOGTYPE", "DIR");
@@ -63,11 +56,14 @@ int _browse_folder(Ihandle* ih)
 int export_dialog_folder(Ihandle* ih)
 {
 	//Make sure an image is selected
+	LinkedList* ll = main_window_get_images_if_populated();
+	if(!ll)
+		return IUP_DEFAULT;
 
 	//Directory textbox
 	dir = IupText(NULL);
 	IupSetAttribute(dir, "VALUE", "");//directory);
-	IupSetAttributes(dir, "VISIBLECOLUMNS=30, NC=1024");
+	IupSetAttributes(dir, "EXPAND=HORIZONTAL, NC=1024");
 	IupSetCallback(dir, "VALUECHANGED_CB", (Icallback)_set_status);
 
 	//Browse button
@@ -120,9 +116,8 @@ int export_dialog_folder(Ihandle* ih)
 					cancel,
 					NULL
 			)
-	), "TITLE=\"Export as Matrix\", DIALOGFRAME=YES, HIDETASKBAR=YES");
+	), "TITLE=\"Export as Matrix\", DIALOGFRAME=YES, HIDETASKBAR=YES, RASTERSIZE=640x");
 	IupSetAttributeHandle(dlg, "DEFAULTESC", cancel);
-	IupSetAttribute(dlg, "RASTERSIZE", "640x");
 
 	IupPopup(dlg, IUP_CURRENT, IUP_CURRENT);
 	IupDestroy(dlg);

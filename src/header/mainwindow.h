@@ -1,32 +1,21 @@
 #ifndef MAINWINDOW_H_LEL
 #define MAINWINDOW_H_LEL
 
+#include "imageio.h"
 #include "linkedlist.h"
+#include "statusbar.h"
+#include "bufmsg.h"
+#include "exportdialog.h"
 
 #include <iup.h>
-#include <im.h>
 #include <im_image.h>
+#include <im_process_loc.h>
+#include <iupim.h>
 
-#include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
 
-#define SEPARATOR (char*)1
-
-Ihandle* win;		//The window
-Ihandle* list;		//List of images opened
-LinkedList *images;	//Size can be accessed by IupGetInt(list,"COUNT")
-
-typedef enum {CONDITION_NONE, CONDITION_POPULATED, CONDITION_SELECTED} ActivationCondition;
-typedef struct {
-	const char* label;
-	Icallback cb;
-	ActivationCondition condition;
-} MenuItem;
-
-typedef int (*FunctionCallback)();
-typedef struct {
-	int key;
-	FunctionCallback cb;
-} Keyboard;
+Ihandle* main_window;
 
 //Path separator
 #ifdef _WIN32
@@ -35,16 +24,11 @@ typedef struct {
 #define PATHSEP "/"
 #endif
 
-void set_menu_state();
-int wiki(Ihandle*);
-int about(Ihandle*);
-Icallback k_all(Ihandle*, int);
-int render_image(Ihandle*, char*, int, int);
-Ihandle* create_mainwindow(int, char**);
-void cleanup();
-Ihandle* create_submenu(const char*, MenuItem*);
-void add_image(imImage*);
-int close_image(Ihandle*);
-int close_all(Ihandle*);
+void main_window_set_menu_state();
+void main_window_cleanup();
+void main_window_add_image(imImage*);
+LinkedList* main_window_get_images_if_populated();
+
+Ihandle* main_window_create(int, char**);
 
 #endif /* MAINWINDOW_H_LEL */

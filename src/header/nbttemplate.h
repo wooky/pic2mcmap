@@ -7,7 +7,7 @@
 extern "C" {
 #endif
 
-nbt_node* create_nbt_template();
+nbt_node* nbt_template_create();
 
 #ifdef __cplusplus
 }

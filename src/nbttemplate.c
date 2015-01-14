@@ -20,7 +20,7 @@
 #define NBT_DATA_OFFSET NBT_SIZE_COMPOUND(0)+NBT_SIZE_COMPOUND(4)+NBT_SIZE_BYTE(5)+NBT_SIZE_BYTE(9)+NBT_SIZE_SHORT(6)+NBT_SIZE_SHORT(5)+NBT_SIZE_INT(7)+NBT_SIZE_INT(7)+NBT_SIZE_INT(6)
 #define NBT_TOTAL_SIZE NBT_DATA_OFFSET+16384+2
 
-unsigned char nbt_template[NBT_TOTAL_SIZE] = {
+static unsigned char nbt_template[NBT_TOTAL_SIZE] = {
 	TAG_COMPOUND, 0, 0,																//root tag, unnamed
 		TAG_COMPOUND, 0, 4, 'd','a','t','a',											//map data tag
 			TAG_BYTE,		0,5,	's','c','a','l','e',					4,				//map scale - set it to maximum (4) because we don't want to allow combining maps
@@ -32,7 +32,7 @@ unsigned char nbt_template[NBT_TOTAL_SIZE] = {
 			TAG_BYTE_ARRAY,	0,6,	'c','o','l','o','r','s',				0,0,64,0		//16384 entries (=64*256)
 };
 
-nbt_node* create_nbt_template()
+nbt_node* nbt_template_create()
 {
 		nbt_template[NBT_TOTAL_SIZE - 2] = TAG_INVALID;									//END map data tag
 	nbt_template[NBT_TOTAL_SIZE - 1] = TAG_INVALID;									//END root tag

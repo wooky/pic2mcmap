@@ -9,13 +9,13 @@
 #include "header/imageutil.h"
 
 //Throw an error
-void throw_error(int i, int index)
+static void _throw_error(int i, int index)
 {
 	printf("[ERROR] Cannot access element %d, only %d elements exist!\n", index, i);
 }
 
 //Clean inside the linked list and free the memory
-void clean_inside(LinkedList* ll)
+static void _clean_inside(LinkedList* ll)
 {
 	imImageDestroy(ll->contents);
 	imImageDestroy(ll->thumbnail);
@@ -43,7 +43,7 @@ LinkedList* LL_get(LinkedList* head, int index)
 		//If the current location is NULL, we have gone too far, so throw an error
 		if(new_loc == NULL)
 		{
-			throw_error(i,index);
+			_throw_error(i,index);
 			return NULL;
 		}
 	}
@@ -51,7 +51,7 @@ LinkedList* LL_get(LinkedList* head, int index)
 	//If the current location is still NULL, throw an error
 	if(new_loc == NULL)
 	{
-		throw_error(i,index);
+		_throw_error(i,index);
 		return NULL;
 	}
 
@@ -72,12 +72,12 @@ LinkedList* LL_insert(LinkedList** loc, imImage* image, int index)
 
 	LinkedList *img = malloc(sizeof(LinkedList));
 	img->contents = image;
-	img->thumbnail = get_image_thumbnail(image);
-	img->grid = split_to_grid(image, &img->rows, &img->cols);
+	img->thumbnail = util_get_thumbnail(image);
+	img->grid = util_split_to_grid(image, &img->rows, &img->cols);
 
 	img->iContents = IupImageFromImImage(image);
 	img->iThumbnail = IupImageFromImImage(img->thumbnail);
-	img->iGrid = grid_images(img->grid, (img->rows * img->cols));
+	img->iGrid = util_grid_images(img->grid, (img->rows * img->cols));
 
 	//Seek out the address after which to insert the image
 	for(i = 0, old_loc = NULL, new_loc = *loc; i < index; i++, old_loc = new_loc, new_loc = new_loc->next)
@@ -109,7 +109,7 @@ void LL_remove(LinkedList** head, int index)
 		//If the current location is NULL, we have gone too far, so throw an error
 		if(new_loc == NULL)
 		{
-			throw_error(i,index);
+			_throw_error(i,index);
 			return;
 		}
 	}
@@ -117,7 +117,7 @@ void LL_remove(LinkedList** head, int index)
 	//If the current location is still NULL, throw an error
 	if(new_loc == NULL)
 	{
-		throw_error(i,index);
+		_throw_error(i,index);
 		return;
 	}
 
@@ -129,7 +129,7 @@ void LL_remove(LinkedList** head, int index)
 		old_loc->next = new_loc->next;
 
 	//Delete the current entry
-	clean_inside(new_loc);
+	_clean_inside(new_loc);
 }
 
 void LL_purge(LinkedList** head)
@@ -139,7 +139,7 @@ void LL_purge(LinkedList** head)
 	{
 		LinkedList* old = loc;
 		loc = loc->next;
-		clean_inside(old);
+		_clean_inside(old);
 	}
 	*head = NULL;
 }

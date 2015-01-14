@@ -2,9 +2,6 @@
 #include "header/statusbar.h"
 #include "header/datformat.hpp"
 
-#include <iup.h>
-#include <im.h>
-#include <im_image.h>
 #include <im_process_loc.h>
 #include <im_util.h>
 #include <iupim.h>
@@ -62,7 +59,7 @@ static const unsigned char DATPalette[DATPALETTE_SIZE][3] = {
 //Uses square Eucledian distance
 //We're using this function rather than the one given by IM because that one sucks for some reason
 #define square(x) (x)*(x)
-unsigned char nearest_color_index(unsigned char r, unsigned char g, unsigned char b)
+static unsigned char _nearest_color_index(unsigned char r, unsigned char g, unsigned char b)
 {
 	short index = -1, i;
 	unsigned int diff = -1;
@@ -84,7 +81,7 @@ unsigned char nearest_color_index(unsigned char r, unsigned char g, unsigned cha
 
 //I would like to use imConvertColorSpace instead, however that function doesn't handle transparencies, which is quite critical for this program.
 //Thus, I have to write my own function.
-imImage* mapify(imImage* orig)
+static imImage* _mapify(imImage* orig)
 {
 	//If the original file is already a DAT file, just dupe the given image and return it
 	if(imImageGetAttribute(orig, "DAT", NULL, NULL))
@@ -136,7 +133,7 @@ imImage* mapify(imImage* orig)
 		}
 
 		//Get the pixel value and see if it's transparent
-		unsigned char nearest_color = nearest_color_index(r, g, b);
+		unsigned char nearest_color = _nearest_color_index(r, g, b);
 		nova[i] = nearest_color;
 		if(!nearest_color)
 			nova[ppp + i] = 255;
@@ -145,7 +142,7 @@ imImage* mapify(imImage* orig)
 	return mod;
 }
 
-imImage* get_image_thumbnail(imImage* orig)
+imImage* util_get_thumbnail(imImage* orig)
 {
 	if(orig->width == 128 && orig->height == 128)
 		return imImageDuplicate(orig);
@@ -156,7 +153,7 @@ imImage* get_image_thumbnail(imImage* orig)
 	return temp;
 }
 
-imImage** split_to_grid(imImage* orig, unsigned char* rows, unsigned char* cols)
+imImage** util_split_to_grid(imImage* orig, unsigned char* rows, unsigned char* cols)
 {
 	unsigned char nCols = orig->width/128, nRows = orig->height/128, i,j;
 	status_bar_count(nCols * nRows);
@@ -172,7 +169,7 @@ imImage** split_to_grid(imImage* orig, unsigned char* rows, unsigned char* cols)
 		{
 			//                               When the image is top-down, crop the top; otherwise, from the "bottom" (which is actually the top)
 			imProcessCrop(orig, temp, j*128, imColorModeIsTopDown(orig->color_space) ? i*128 : (nRows-i-1)*128);
-			matrix[i*nCols + j] = mapify(temp);
+			matrix[i*nCols + j] = _mapify(temp);
 
 			status_bar_inc();
 		}
@@ -182,7 +179,7 @@ imImage** split_to_grid(imImage* orig, unsigned char* rows, unsigned char* cols)
 	return matrix;
 }
 
-Ihandle** grid_images(imImage** matrix, int size)
+Ihandle** util_grid_images(imImage** matrix, int size)
 {
 	Ihandle** handle = malloc(size * sizeof(Ihandle*));
 	int i;

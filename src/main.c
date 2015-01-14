@@ -8,7 +8,7 @@
 
 Ihandle* win = NULL;
 
-void on_crash()
+static void _on_crash()
 {
 	Ihandle* dead = IupMessageDlg();
 	IupSetAttributeHandle(dead, "PARENTDIALOG", win);
@@ -24,7 +24,7 @@ void on_crash()
 int main(int argc, char** argv)
 {
 	//Really crappy error handler
-	signal(SIGSEGV, on_crash);
+	signal(SIGSEGV, _on_crash);
 
 	//Initialize IUP
 	if(IupOpen(NULL,NULL) == IUP_ERROR)
@@ -37,13 +37,13 @@ int main(int argc, char** argv)
 	formatRegisterDAT();
 
 	//Create the main window
-	win = create_mainwindow(argc, argv);
+	win = main_window_create(argc, argv);
 
 	//Mainloop
 	IupMainLoop();
 
 	//Clean up and exit
-	cleanup();
+	main_window_cleanup();
 	IupClose();
 	return 0;
 }

@@ -1,11 +1,5 @@
 #include "header/bufmsg.h"
 
-#include <iup.h>
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 static char done = 1, triggered = 0;
 static char *ttl, *buf;
 

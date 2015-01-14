@@ -5,24 +5,15 @@
 #include "header/bufmsg.h"
 #include "header/imageutil.h"
 
-#include <iup.h>
-
-#include <im.h>
-#include <im_image.h>
 #include <im_process_loc.h>
-#include <iupim.h>
-#include <im_convert.h>
-#include <im_util.h>
 
 #include <string.h>
-#include <stddef.h>
-#include <stdlib.h>
 #include <stdio.h>
 
 //Put these into the Options dialog, not hard-coded
 #define RESIZE_ORDER 0
 
-int closest128(int x)
+static int _closest128(int x)
 {
 	if(x <= 192)
 		return 128;
@@ -33,7 +24,7 @@ int closest128(int x)
 	}
 }
 
-int open_image_file(Ihandle* ih)
+int image_open_file(Ihandle* ih)
 {
 	//Show the open file dialog
 	Ihandle* dlg = IupFileDlg();
@@ -66,7 +57,7 @@ int open_image_file(Ihandle* ih)
 
 	//If the lengths of the strings are exactly the same, this means that we only have one file. So process it immediately.
 	if(strlen(fnames) == flength)
-		parse_image_file(ih, fnames, FINAL_OP, 0, 0);
+		image_parse_file(ih, fnames, FINAL_OP, 0, 0);
 
 	//Otherwise, go through every filename, concatenate it to the path, and parse it
 	else
@@ -83,19 +74,19 @@ int open_image_file(Ihandle* ih)
 		{
 			sprintf(path, "%s%s", dir, fnames);
 			fnames = strtok(NULL, "|");
-			parse_image_file(ih, path, fnames ? NORMAL_OP : FINAL_OP, 0, 0);
+			image_parse_file(ih, path, fnames ? NORMAL_OP : FINAL_OP, 0, 0);
 		}
 	}
 
 	IupDestroy(dlg);
-	set_menu_state();
+	main_window_set_menu_state();
 	return IUP_DEFAULT;
 }
 
 //Parse the given filename
 //3 last extra arguments to satisfy DROPFILES_CB, because I'm too lazy to write yet another function to call this one
 //Pass NORMAL_OP to num for normal operation, otherwise weird stuff might happen
-void parse_image_file(Ihandle* ih, const char* name, int num, int x, int y)
+void image_parse_file(Ihandle* ih, const char* name, int num, int x, int y)
 {
 	//Initialize the buffered message
 	buf_msg_init("Error Opening File(s)", "The following error(s) occurred while trying to open files:");
@@ -111,14 +102,14 @@ void parse_image_file(Ihandle* ih, const char* name, int num, int x, int y)
 		buf_msg_put(msg);
 	}
 	else if(img->width % 128 == 0 && img->height % 128 == 0)
-		add_image(img);
+		main_window_add_image(img);
 	else
 	{
 		imImage *temp = imImageClone(img);
-		imImageReshape(temp, closest128(img->width), closest128(img->height));
+		imImageReshape(temp, _closest128(img->width), _closest128(img->height));
 		imProcessResize(img, temp, RESIZE_ORDER);
 		imImageDestroy(img);
-		add_image(temp);
+		main_window_add_image(temp);
 	}
 
 	status_bar_done();
@@ -129,17 +120,10 @@ void parse_image_file(Ihandle* ih, const char* name, int num, int x, int y)
 }
 
 //Save a file to a given list of formats
-int save_file(Ihandle* ih)
+int image_save_file(Ihandle* ih)
 {
 	//Making sure we actually have an image selected
-	if(!IupGetInt(list, "COUNT"))
-		return IUP_DEFAULT;
-
-	int val = IupGetInt(list,"VALUE");
-	if(val <= 0)
-		return IUP_DEFAULT;
-
-	LinkedList* ll = LL_get(images, val-1);
+	LinkedList* ll = main_window_get_images_if_populated();
 	if(!ll)
 		return IUP_DEFAULT;
 
