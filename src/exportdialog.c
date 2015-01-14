@@ -4,10 +4,11 @@
 #include <iup.h>
 
 #include <stdio.h>
+#include <string.h>
 #include <sys/stat.h>
 
 //static char directory[1024] = "", format[128] = "map_%d.dat";
-static Ihandle *dir, *frmt, *result, *count, *dlg;
+static Ihandle *dir, *frmt, *result, *count, *export, *dlg;
 static int nOfImages;
 
 char _is_directory(const char* path)
@@ -36,12 +37,26 @@ int _set_status(Ihandle* ih)
 			int from = IupGetInt(count, "VALUE");
 			sprintf(start_file, format, from);
 			sprintf(end_file, format, from+nOfImages);
-			sprintf(buf, "Maps will be saved to files %s"PATHSEP"%s to %s"PATHSEP"%s", path, start_file, path, end_file);
+			sprintf(buf, "Maps will be saved to %s"PATHSEP"%s through %s"PATHSEP"%s", path, start_file, path, end_file);
 		}
 	}
 
 	IupSetAttribute(result, "TITLE", buf);
 
+	return IUP_DEFAULT;
+}
+
+int _browse_folder(Ihandle* ih)
+{
+	Ihandle* derp = IupFileDlg();
+	IupSetAttribute(derp, "DIALOGTYPE", "DIR");
+	IupPopup(derp, IUP_CURRENT, IUP_CURRENT);
+
+	if(IupGetInt(derp, "STATUS") != -1)
+		IupSetAttribute(dir, "VALUE", IupGetAttribute(derp, "VALUE"));
+
+	IupDestroy(derp);
+	_set_status(ih);
 	return IUP_DEFAULT;
 }
 
@@ -57,7 +72,7 @@ int export_dialog_folder(Ihandle* ih)
 
 	//Browse button
 	Ihandle* button_browse = IupButton("...", NULL);
-	//ACTION_CB -> _browse_folder()
+	IupSetCallback(button_browse, "ACTION", _browse_folder);
 
 	//Format textbox
 	frmt = IupText(NULL);
@@ -68,7 +83,7 @@ int export_dialog_folder(Ihandle* ih)
 	//Counter start textbox
 	count = IupText(NULL);
 	IupSetAttribute(count, "SPIN", "YES");
-	//Set SPINMAX to 65535-image count
+	IupSetInt(count, "SPINMAX", INT_MAX);
 	IupSetCallback(count, "VALUECHANGED_CB", (Icallback)_set_status);
 
 	//Result label
@@ -79,6 +94,10 @@ int export_dialog_folder(Ihandle* ih)
 	//Cancel button
 	Ihandle* cancel = IupButton("Cancel", NULL);
 	IupSetCallback(cancel, "ACTION", (Icallback)IupExitLoop);
+
+	//Export button
+	export = IupButton("Export", NULL);
+	//ACTION->
 
 	dlg = IupSetAttributes(IupDialog(
 			IupVbox(
@@ -103,6 +122,7 @@ int export_dialog_folder(Ihandle* ih)
 			)
 	), "TITLE=\"Export as Matrix\", DIALOGFRAME=YES, HIDETASKBAR=YES");
 	IupSetAttributeHandle(dlg, "DEFAULTESC", cancel);
+	IupSetAttribute(dlg, "RASTERSIZE", "640x");
 
 	IupPopup(dlg, IUP_CURRENT, IUP_CURRENT);
 	IupDestroy(dlg);
