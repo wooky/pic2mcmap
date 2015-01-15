@@ -11,7 +11,7 @@
 #define LL_APPEND INT_MAX
 
 typedef struct LinkedList {
-	unsigned char rows, cols;
+	unsigned short rows, cols;
 
 	imImage* contents;
 	imImage* thumbnail;

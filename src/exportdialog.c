@@ -1,8 +1,19 @@
 #include "header/exportdialog.h"
 
-//static char directory[1024] = "", format[128] = "map_%d.dat";
 static Ihandle *dir, *frmt, *result, *count, *export, *dlg;
 static int nOfImages;
+static char buf[2048];
+
+static int _do_export(Ihandle* ih)
+{
+	strcpy(buf, IupGetAttribute(dir, "VALUE"));
+	int i, len = strlen(buf);
+	for(i = 0; i < nOfImages; i++)
+	{
+
+	}
+	return IUP_CLOSE;
+}
 
 static char _is_directory(const char* path)
 {
@@ -12,10 +23,13 @@ static char _is_directory(const char* path)
 
 static int _set_status(Ihandle* ih)
 {
-	static char buf[2048];
+	char *active = "ACTIVE", *yes = "YES", *no = "NO";
 	const char* path = IupGetAttribute(dir, "VALUE");
 	if(!_is_directory(path))
+	{
 		sprintf(buf, "\"%s\" is not a valid folder", path);
+		IupSetAttribute(export, active, no);
+	}
 	else
 	{
 		char* format = IupGetAttribute(frmt, "VALUE");
@@ -23,14 +37,18 @@ static int _set_status(Ihandle* ih)
 		//Ensure that the format is in a proper format, i.e. has a %d
 		char* pos = strstr(format, "%");
 		if(!pos || *(pos+1) != 'd')
+		{
 			sprintf(buf, "The format \"%s\" is invalid as it does not contain a %%d", format);
+			IupSetAttribute(export, active, no);
+		}
 		else
 		{
 			char start_file[256], end_file[256];
 			int from = IupGetInt(count, "VALUE");
 			sprintf(start_file, format, from);
-			sprintf(end_file, format, from+nOfImages);
+			sprintf(end_file, format, from+nOfImages-1);
 			sprintf(buf, "Maps will be saved to %s"PATHSEP"%s through %s"PATHSEP"%s", path, start_file, path, end_file);
+			IupSetAttribute(export, active, yes);
 		}
 	}
 
@@ -60,9 +78,12 @@ int export_dialog_folder(Ihandle* ih)
 	if(!ll)
 		return IUP_DEFAULT;
 
+	//Get the image count
+	nOfImages = ll->rows * ll->cols;
+
 	//Directory textbox
 	dir = IupText(NULL);
-	IupSetAttribute(dir, "VALUE", "");//directory);
+	IupSetAttribute(dir, "VALUE", "");
 	IupSetAttributes(dir, "EXPAND=HORIZONTAL, NC=1024");
 	IupSetCallback(dir, "VALUECHANGED_CB", (Icallback)_set_status);
 
@@ -72,7 +93,7 @@ int export_dialog_folder(Ihandle* ih)
 
 	//Format textbox
 	frmt = IupText(NULL);
-	IupSetAttribute(frmt, "VALUE", "map_%d.dat");//format);
+	IupSetAttribute(frmt, "VALUE", "map_%d.dat");
 	IupSetAttributes(frmt, "VISIBLECOLUMNS=10, NC=128");
 	IupSetCallback(frmt, "VALUECHANGED_CB", (Icallback)_set_status);
 
@@ -85,15 +106,14 @@ int export_dialog_folder(Ihandle* ih)
 	//Result label
 	result = IupLabel("");
 	IupSetAttribute(result, "EXPAND", "HORIZONTAL");
-	_set_status(NULL);
+
+	//Export button
+	export = IupButton("Export", NULL);
+	IupSetCallback(export, "ACTION", (Icallback)_do_export);
 
 	//Cancel button
 	Ihandle* cancel = IupButton("Cancel", NULL);
 	IupSetCallback(cancel, "ACTION", (Icallback)IupExitLoop);
-
-	//Export button
-	export = IupButton("Export", NULL);
-	//ACTION->
 
 	dlg = IupSetAttributes(IupDialog(
 			IupVbox(
@@ -113,13 +133,20 @@ int export_dialog_folder(Ihandle* ih)
 					IupSetAttributes(IupFrame(
 							result
 					), "TITLE=Result"),
-					cancel,
+					IupHbox(
+						export,
+						IupFill(),
+						cancel,
+						NULL
+					),
 					NULL
 			)
 	), "TITLE=\"Export as Matrix\", DIALOGFRAME=YES, HIDETASKBAR=YES, RASTERSIZE=640x");
 	IupSetAttributeHandle(dlg, "DEFAULTESC", cancel);
 
+	_set_status(NULL);
 	IupPopup(dlg, IUP_CURRENT, IUP_CURRENT);
+
 	IupDestroy(dlg);
 	return IUP_DEFAULT;
 }

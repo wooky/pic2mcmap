@@ -9,7 +9,7 @@
 #include <iupim.h>
 
 imImage* util_get_thumbnail(imImage*);
-imImage** util_split_to_grid(imImage*, unsigned char*, unsigned char*);
+imImage** util_split_to_grid(imImage*, unsigned short*, unsigned short*);
 Ihandle** util_grid_images(imImage**, int);
 
 const char* imIupErrorMessage(int);

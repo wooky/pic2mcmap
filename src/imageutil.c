@@ -145,9 +145,9 @@ imImage* util_get_thumbnail(imImage* orig)
 	return temp;
 }
 
-imImage** util_split_to_grid(imImage* orig, unsigned char* rows, unsigned char* cols)
+imImage** util_split_to_grid(imImage* orig, unsigned short* rows, unsigned short* cols)
 {
-	unsigned char nCols = orig->width/128, nRows = orig->height/128, i,j;
+	unsigned short nCols = orig->width/128, nRows = orig->height/128, i,j;
 	status_bar_count(nCols * nRows);
 
 	*cols = nCols;

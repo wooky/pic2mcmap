@@ -52,17 +52,18 @@ int image_open_file(Ihandle* ih)
 	//Otherwise, go through every filename, concatenate it to the path, and parse it
 	else
 	{
-		char path[1024], dir[512];
+		char path[1024];
 
 		//Copy the directory, noting the path separator
-		sprintf(dir, "%s"PATHSEP, fnames);
+		sprintf(path, "%s"PATHSEP, fnames);
+		int len = strlen(path);
 
 		//We need a token right now so that we know the first filename
 		fnames = strtok(NULL, "|");
 
 		while(fnames)
 		{
-			sprintf(path, "%s%s", dir, fnames);
+			strcpy(path + len, fnames);
 			fnames = strtok(NULL, "|");
 			image_parse_file(ih, path, fnames ? NORMAL_OP : FINAL_OP, 0, 0);
 		}
