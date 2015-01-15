@@ -69,7 +69,7 @@ static int _set_status(Ihandle* ih)
 		}
 	}
 
-	IupSetAttribute(result, "TITLE", buf);
+	IupSetAttribute(result, "VALUE", buf);
 
 	return IUP_DEFAULT;
 }
@@ -120,9 +120,9 @@ int export_dialog_folder(Ihandle* ih)
 	IupSetInt(count, "SPINMAX", INT_MAX);
 	IupSetCallback(count, "VALUECHANGED_CB", (Icallback)_set_status);
 
-	//Result label
-	result = IupLabel("");
-	IupSetAttribute(result, "EXPAND", "HORIZONTAL");
+	//Result textbox
+	result = IupText(NULL);
+	IupSetAttributes(result, "EXPAND=HORIZONTAL, MULTILINE=YES, VISIBLELINES=2, ACTIVE=NO, SCROLLBAR=NO, WORDWRAP=YES");
 
 	//Export button
 	export = IupButton("Export", NULL);
@@ -158,7 +158,7 @@ int export_dialog_folder(Ihandle* ih)
 					),
 					NULL
 			)
-	), "TITLE=\"Export as Matrix\", DIALOGFRAME=YES, HIDETASKBAR=YES, RASTERSIZE=640x");
+	), "TITLE=\"Export as Matrix\", DIALOGFRAME=YES, HIDETASKBAR=YES");
 	IupSetAttributeHandle(dlg, "DEFAULTESC", cancel);
 
 	_set_status(NULL);
