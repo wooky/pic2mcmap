@@ -43,6 +43,7 @@ void buf_msg_show()
 
 	free(ttl);
 	free(buf);
+	triggered = 0;
 	done = 1;
 }
 
