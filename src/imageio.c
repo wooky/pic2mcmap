@@ -160,7 +160,7 @@ int image_save_file(Ihandle* ih)
 
 	//Actually save the image
 	sprintf(msg, "%s.%s", fname, ext);
-	int err = imFileImageSave(msg, ext, big) != IM_ERR_NONE;
+	int err = imFileImageSave(msg, ext, big);
 	if(err != IM_ERR_NONE)
 	{
 		sprintf(msg, "The following error occurred while saving to %s.%s: %s (%d)\n", fname, ext, imIupErrorMessage(err), err);

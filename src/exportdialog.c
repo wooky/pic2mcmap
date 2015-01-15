@@ -1,17 +1,34 @@
 #include "header/exportdialog.h"
 
 static Ihandle *dir, *frmt, *result, *count, *export, *dlg;
+static LinkedList* ll;
 static int nOfImages;
 static char buf[2048];
 
 static int _do_export(Ihandle* ih)
 {
-	strcpy(buf, IupGetAttribute(dir, "VALUE"));
+	buf_msg_init("Error Saving Map(s)", "The following error(s) occurred while saving to map files:");
+	status_bar_init("Saving map cluster...");
+	status_bar_count(nOfImages);
+
+	char *format = IupGetAttribute(frmt, "VALUE");
+	sprintf(buf, "%s"PATHSEP, IupGetAttribute(dir, "VALUE"));
 	int i, len = strlen(buf);
 	for(i = 0; i < nOfImages; i++)
 	{
-
+		sprintf(buf+len, format, i);
+		int err = imFileImageSave(buf, "DAT", ll->grid[i]);
+		if(err != IM_ERR_NONE)
+		{
+			int l = strlen(buf);
+			sprintf(buf+l, "The following error occurred while saving to %s: %s (%d)\n", buf, imIupErrorMessage(err), err);
+			buf_msg_put(buf+l);
+		}
+		status_bar_inc();
 	}
+
+	status_bar_done();
+	buf_msg_show();
 	return IUP_CLOSE;
 }
 
@@ -74,7 +91,7 @@ static int _browse_folder(Ihandle* ih)
 int export_dialog_folder(Ihandle* ih)
 {
 	//Make sure an image is selected
-	LinkedList* ll = main_window_get_images_if_populated();
+	ll = main_window_get_images_if_populated();
 	if(!ll)
 		return IUP_DEFAULT;
 
