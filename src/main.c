@@ -10,12 +10,9 @@ Ihandle* win = NULL;
 
 static void _on_crash()
 {
-	Ihandle* dead = IupMessageDlg();
-	IupSetAttributeHandle(dead, "PARENTDIALOG", win);
-	IupSetAttributes(dead, "TITLE=\"Pic2MCMap has Crashed!\", VALUE=\"It appears the program has crashed.\nThis probably happened because you tried to open "
-			"an image it didn't like.\nWould you like to submit an issue to the project's GitHub page?\", BUTTONS=YESNO, DIALOGTYPE=ERROR");
-	IupPopup(dead, IUP_CURRENT, IUP_CURRENT);
-	if(*IupGetAttribute(dead, "BUTTONRESPONSE") == '1')
+	int res = IupAlarm("Pic2MCMap has Crashed!", "Unfortunately, the program has crashed.\nIf this is the first time you see this message, trying repeating the same steps you made to get this "
+			"message.\nIf this message reappears, please submit an issue to the project's GitHub page.\n\nThe program will not close.", "Open GitHub Page", "Exit", NULL);
+	if(res == 1)
 		IupHelp("https://github.com/wooky/pic2mcmap/issues");
 
 	exit(-1);
@@ -23,7 +20,7 @@ static void _on_crash()
 
 int main(int argc, char** argv)
 {
-	//Really crappy error handler
+	//Error handler
 	signal(SIGSEGV, _on_crash);
 
 	//Initialize IUP
