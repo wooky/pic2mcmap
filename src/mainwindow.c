@@ -193,6 +193,7 @@ static Keyboard keyboard[] = {
 	{iup_XkeyCtrl(K_W),					&_close_image},
 	{iup_XkeyCtrl(iup_XkeyShift(K_W)),	&_close_all},
 	{iup_XkeyCtrl(K_S),					&image_save_file},
+	{iup_XkeyCtrl(K_E),					&export_dialog_world},
 	{iup_XkeyCtrl(iup_XkeyShift(K_E)),	&export_dialog_folder},
 	{K_F1,								&_wiki},
 	{(int)NULL}
@@ -281,7 +282,7 @@ Ihandle* main_window_create(int argc, char** argv)
 			{"&Import from World...\tCtrl+I", NULL, CONDITION_NONE},
 			{"I&mport as Matrix...\tCtrl+Shift+I", NULL, CONDITION_NONE},
 			{SEPARATOR},
-			{"&Export to World...\tCtrl+E", NULL, CONDITION_SELECTED},
+			{"&Export to World...\tCtrl+E", (Icallback)export_dialog_world, CONDITION_SELECTED},
 			{"E&xport as Matrix...\tCtrl+Shift+E", (Icallback)export_dialog_folder, CONDITION_SELECTED},
 			{NULL}
 		}),

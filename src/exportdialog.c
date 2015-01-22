@@ -1,6 +1,6 @@
 #include "header/exportdialog.h"
 
-static Ihandle *dir, *frmt, *result, *count, *export, *dlg;
+static Ihandle *dir, *frmt, *result, *count, *export, *dlg, *button_browse, *cancel;
 static LinkedList* ll;
 static int nOfImages;
 static char buf[2048];
@@ -88,12 +88,12 @@ static int _browse_folder(Ihandle* ih)
 	return IUP_DEFAULT;
 }
 
-int export_dialog_folder(Ihandle* ih)
+char _setup_dialog()
 {
 	//Make sure an image is selected
 	ll = main_window_get_images_if_populated();
 	if(!ll)
-		return IUP_DEFAULT;
+		return 0;
 
 	//Get the image count
 	nOfImages = ll->rows * ll->cols;
@@ -105,7 +105,7 @@ int export_dialog_folder(Ihandle* ih)
 	IupSetCallback(dir, "VALUECHANGED_CB", (Icallback)_set_status);
 
 	//Browse button
-	Ihandle* button_browse = IupButton("...", NULL);
+	button_browse = IupButton("...", NULL);
 	IupSetCallback(button_browse, "ACTION", _browse_folder);
 
 	//Format textbox
@@ -129,8 +129,60 @@ int export_dialog_folder(Ihandle* ih)
 	IupSetCallback(export, "ACTION", (Icallback)_do_export);
 
 	//Cancel button
-	Ihandle* cancel = IupButton("Cancel", NULL);
+	cancel = IupButton("Cancel", NULL);
 	IupSetCallback(cancel, "ACTION", (Icallback)IupExitLoop);
+
+	return 1;
+}
+
+int export_dialog_world(Ihandle* ih)
+{
+	if(!_setup_dialog())
+		return IUP_DEFAULT;
+
+	IupSetAttribute(frmt, "ACTIVE", "NO");
+	IupSetAttribute(count, "ACTIVE", "NO");
+
+	dlg = IupSetAttributes(IupDialog(
+			IupVbox(
+					IupSetAttributes(IupHbox(
+							IupLabel("Select world save folder: "),
+							dir,
+							button_browse,
+							NULL
+					), "ALIGNMENT=ACENTER"),
+					IupSetAttributes(IupHbox(
+							IupLabel("Save in the format "),
+							frmt,
+							IupLabel(" where %d starts at "),
+							count,
+							NULL
+					), "ALIGNMENT=ACENTER"),
+					IupSetAttributes(IupFrame(
+							result
+					), "TITLE=Result"),
+					IupHbox(
+						export,
+						IupFill(),
+						cancel,
+						NULL
+					),
+					NULL
+			)
+	), "TITLE=\"Export as Matrix\", DIALOGFRAME=YES, HIDETASKBAR=YES");
+	IupSetAttributeHandle(dlg, "DEFAULTESC", cancel);
+
+	_set_status(NULL);
+	IupPopup(dlg, IUP_CURRENT, IUP_CURRENT);
+
+	IupDestroy(dlg);
+	return IUP_DEFAULT;
+}
+
+int export_dialog_folder(Ihandle* ih)
+{
+	if(!_setup_dialog())
+		return IUP_DEFAULT;
 
 	dlg = IupSetAttributes(IupDialog(
 			IupVbox(
@@ -167,4 +219,3 @@ int export_dialog_folder(Ihandle* ih)
 	IupDestroy(dlg);
 	return IUP_DEFAULT;
 }
-

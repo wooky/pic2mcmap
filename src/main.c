@@ -30,8 +30,9 @@ int main(int argc, char** argv)
 		return 1;
 	}
 
-	//Initialize the DAT format driver
+	//Initialize the DAT format driver and the NBT template
 	formatRegisterDAT();
+	nbt_template_setup();
 
 	//Create the main window
 	win = main_window_create(argc, argv);

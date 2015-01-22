@@ -6,6 +6,7 @@
 #include <limits.h>
 #include <sys/stat.h>
 
+int export_dialog_world(Ihandle*);
 int export_dialog_folder(Ihandle*);
 
 #endif /* HEADER_EXPORTDIALOG_H_ */
