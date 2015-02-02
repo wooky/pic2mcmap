@@ -27,14 +27,10 @@ static unsigned char nbt_template[NBT_TOTAL_SIZE] = {
 			TAG_SHORT,		0,5,	'w','i','d','t','h',					0,128,			//map width of 128 (only possible value so far)
 			TAG_INT,		0,7,	'x','C','e','n','t','e','r',			127,255,255,0,	//some really big (positive) number
 			TAG_INT,		0,7,	'z','C','e','n','t','e','r',			127,255,255,0,	//some really big (positive) number
-			TAG_BYTE_ARRAY,	0,6,	'c','o','l','o','r','s',				0,0,64,0		//16384 entries (=64*256)
+			TAG_BYTE_ARRAY,	0,6,	'c','o','l','o','r','s',				0,0,64,0,		//16384 entries (=64*256)
+		[NBT_TOTAL_SIZE - 2] = TAG_INVALID,												//END map data tag
+	[NBT_TOTAL_SIZE - 1] = TAG_INVALID												//END root tag
 };
-
-//This must be called once, and should not be called more than once
-void nbt_template_setup() {
-		nbt_template[NBT_TOTAL_SIZE - 2] = TAG_INVALID;									//END map data tag
-	nbt_template[NBT_TOTAL_SIZE - 1] = TAG_INVALID;									//END root tag
-}
 
 nbt_node* nbt_template_create()
 {

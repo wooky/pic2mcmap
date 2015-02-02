@@ -10,7 +10,6 @@
 extern "C" {
 #endif
 
-void nbt_template_setup();
 nbt_node* nbt_template_create();
 
 #ifdef __cplusplus
