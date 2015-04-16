@@ -1,4 +1,3 @@
-* Save to map cluster
 * Open map cluster
 * Read from a config file
 * Set up an options menu
