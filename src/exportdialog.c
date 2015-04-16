@@ -4,6 +4,7 @@ static Ihandle *dir, *frmt, *result, *count, *export, *dlg, *button_browse, *can
 static LinkedList* ll;
 static int nOfImages;
 static char buf[2048];
+static unsigned short from, to;
 
 static int _do_export(Ihandle* ih)
 {
@@ -13,10 +14,11 @@ static int _do_export(Ihandle* ih)
 
 	char *format = IupGetAttribute(frmt, "VALUE");
 	sprintf(buf, "%s"PATHSEP, IupGetAttribute(dir, "VALUE"));
-	int i, len = strlen(buf);
+	int len = strlen(buf);
+	short i;
 	for(i = 0; i < nOfImages; i++)
 	{
-		sprintf(buf+len, format, i);
+		sprintf(buf+len, format, i + from);
 		int err = imFileImageSave(buf, "DAT", ll->grid[i]);
 		if(err != IM_ERR_NONE)
 		{
@@ -32,6 +34,22 @@ static int _do_export(Ihandle* ih)
 	return IUP_CLOSE;
 }
 
+static int _do_export_to_world(Ihandle* ih)
+{
+	//Define the NBT to be written to idcounts.dat
+#define UNKNOWN 0
+	static unsigned char nbt_output[] = {
+			TAG_COMPOUND, 0, 0,									//root tag, unnamed
+				TAG_SHORT, 0, 3, 'm', 'a', 'p', UNKNOWN, UNKNOWN,	//current map count - unknown at this time
+			TAG_INVALID											//END root tag
+	};
+
+	//Set the last map number to be written
+
+
+	return _do_export(ih);
+}
+
 static char _is_directory(const char* path)
 {
 	static struct stat s;
@@ -40,9 +58,6 @@ static char _is_directory(const char* path)
 
 static int _set_status_for_world(Ihandle* ih)
 {
-	//Reset the starting value
-	IupSetInt(count, "SPINVALUE", 0);
-
 	const char* path = IupGetAttribute(dir, "VALUE");
 	if(!_is_directory(path))
 	{
@@ -62,22 +77,27 @@ static int _set_status_for_world(Ihandle* ih)
 		{
 			//Open idcounts.dat, if it exists, and determine the ID from which to start counting
 			sprintf(buf, "%s"PATHSEP"idcounts.dat", dir);
+			from = 0;
 			FILE *idcounts = fopen(buf, "rb");
 			if(idcounts != NULL) {
 				fseek(idcounts, 0, SEEK_END);
 				size_t length = ftell(idcounts);
 				fseek(idcounts, 0 , SEEK_SET);
+
 				fread(buf, sizeof(char), length, idcounts);
 				nbt_node *nbt = nbt_parse(buf, length);
 				nbt_node *map = nbt_find_by_name(nbt, "map");
 				if(map != NULL)
-				{
-					int16_t lastmap = map->payload.tag_short;
-					IupSetInt(count, "SPINVALUE", (int)++lastmap);
-				}
+					from = ++map->payload.tag_short;
+
 				nbt_free(nbt);
 				fclose(idcounts);
 			}
+
+			IupSetInt(count, "SPINVALUE", (int)from);
+			to = from + nOfImages - 1;
+			sprintf(buf, "Maps will be saved to %s"PATHSEP"map_%hi.dat through %s"PATHSEP"map_%hi.dat", dir, from, dir, to);
+			IupSetAttribute(export, "ACTIVE", "YES");
 		}
 	}
 
@@ -107,9 +127,10 @@ static int _set_status_for_dir(Ihandle* ih)
 		else
 		{
 			char start_file[256], end_file[256];
-			int from = IupGetInt(count, "VALUE");
+			from = (unsigned short)IupGetInt(count, "VALUE");
 			sprintf(start_file, format, from);
-			sprintf(end_file, format, from+nOfImages-1);
+			to = from + nOfImages - 1;
+			sprintf(end_file, format, to);
 			sprintf(buf, "Maps will be saved to %s"PATHSEP"%s through %s"PATHSEP"%s", path, start_file, path, end_file);
 			IupSetAttribute(export, "ACTIVE", "YES");
 		}
@@ -133,7 +154,7 @@ static int _browse_folder(Ihandle* ih)
 	return IUP_DEFAULT;
 }
 
-char _setup_dialog(void* status_callback)
+char _setup_dialog(Icallback status_callback, Icallback export_callback)
 {
 	//Make sure an image is selected
 	ll = main_window_get_images_if_populated();
@@ -147,7 +168,7 @@ char _setup_dialog(void* status_callback)
 	dir = IupText(NULL);
 	IupSetAttribute(dir, "VALUE", "");
 	IupSetAttributes(dir, "EXPAND=HORIZONTAL, NC=1024");
-	IupSetCallback(dir, "VALUECHANGED_CB", (Icallback)status_callback);
+	IupSetCallback(dir, "VALUECHANGED_CB", status_callback);
 
 	//Browse button
 	button_browse = IupButton("...", NULL);
@@ -157,13 +178,13 @@ char _setup_dialog(void* status_callback)
 	frmt = IupText(NULL);
 	IupSetAttribute(frmt, "VALUE", "map_%d.dat");
 	IupSetAttributes(frmt, "VISIBLECOLUMNS=10, NC=128");
-	IupSetCallback(frmt, "VALUECHANGED_CB", (Icallback)status_callback);
+	IupSetCallback(frmt, "VALUECHANGED_CB", status_callback);
 
 	//Counter start textbox
 	count = IupText(NULL);
 	IupSetAttribute(count, "SPIN", "YES");
 	IupSetInt(count, "SPINMAX", INT_MAX);
-	IupSetCallback(count, "VALUECHANGED_CB", (Icallback)status_callback);
+	IupSetCallback(count, "VALUECHANGED_CB", status_callback);
 
 	//Result textbox
 	result = IupText(NULL);
@@ -171,7 +192,7 @@ char _setup_dialog(void* status_callback)
 
 	//Export button
 	export = IupButton("Export", NULL);
-	IupSetCallback(export, "ACTION", (Icallback)_do_export);
+	IupSetCallback(export, "ACTION", export_callback);
 
 	//Cancel button
 	cancel = IupButton("Cancel", NULL);
@@ -182,7 +203,7 @@ char _setup_dialog(void* status_callback)
 
 int export_dialog_world(Ihandle* ih)
 {
-	if(!_setup_dialog(_set_status_for_world))
+	if(!_setup_dialog((Icallback)_set_status_for_world, (Icallback)_do_export_to_world))
 		return IUP_DEFAULT;
 
 	IupSetAttribute(frmt, "ACTIVE", "NO");
@@ -226,7 +247,7 @@ int export_dialog_world(Ihandle* ih)
 
 int export_dialog_folder(Ihandle* ih)
 {
-	if(!_setup_dialog(_set_status_for_dir))
+	if(!_setup_dialog((Icallback)_set_status_for_dir, (Icallback)_do_export))
 		return IUP_DEFAULT;
 
 	dlg = IupSetAttributes(IupDialog(
