@@ -204,7 +204,7 @@ char _setup_dialog(Icallback status_callback, Icallback export_callback)
 
 	//Result textbox
 	result = IupText(NULL);
-	IupSetAttributes(result, "EXPAND=HORIZONTAL, MULTILINE=YES, VISIBLELINES=2, ACTIVE=NO, SCROLLBAR=NO, WORDWRAP=YES");
+	IupSetAttributes(result, "EXPAND=HORIZONTAL, MULTILINE=YES, VISIBLELINES=2, READONLY=YES, WORDWRAP=YES");
 
 	//Export button
 	export = IupButton("Export", NULL);
