@@ -38,14 +38,60 @@ static char _is_directory(const char* path)
 	return (stat(path, &s) == 0 && (s.st_mode & S_IFDIR)) ? 1 : 0;
 }
 
-static int _set_status(Ihandle* ih)
+static int _set_status_for_world(Ihandle* ih)
 {
-	char *active = "ACTIVE", *yes = "YES", *no = "NO";
+	//Reset the starting value
+	IupSetInt(count, "SPINVALUE", 0);
+
 	const char* path = IupGetAttribute(dir, "VALUE");
 	if(!_is_directory(path))
 	{
 		sprintf(buf, "\"%s\" is not a valid folder", path);
-		IupSetAttribute(export, active, no);
+		IupSetAttribute(export, "ACTIVE", "NO");
+	}
+	else
+	{
+		char dir[2048];
+		sprintf(dir, "%s"PATHSEP"data", path);
+		if(!_is_directory(dir))
+		{
+			sprintf(buf, "\"%s\" does not appear to be a valid Minecraft save directory", path);
+			IupSetAttribute(export, "ACTIVE", "NO");
+		}
+		else
+		{
+			//Open idcounts.dat, if it exists, and determine the ID from which to start counting
+			sprintf(buf, "%s"PATHSEP"idcounts.dat", dir);
+			FILE *idcounts = fopen(buf, "rb");
+			if(idcounts != NULL) {
+				fseek(idcounts, 0, SEEK_END);
+				size_t length = ftell(idcounts);
+				fseek(idcounts, 0 , SEEK_SET);
+				fread(buf, sizeof(char), length, idcounts);
+				nbt_node *nbt = nbt_parse(buf, length);
+				nbt_node *map = nbt_find_by_name(nbt, "map");
+				if(map != NULL)
+				{
+					int16_t lastmap = map->payload.tag_short;
+					IupSetInt(count, "SPINVALUE", (int)++lastmap);
+				}
+				nbt_free(nbt);
+				fclose(idcounts);
+			}
+		}
+	}
+
+	IupSetAttribute(result, "VALUE", buf);
+	return IUP_DEFAULT;
+}
+
+static int _set_status_for_dir(Ihandle* ih)
+{
+	const char* path = IupGetAttribute(dir, "VALUE");
+	if(!_is_directory(path))
+	{
+		sprintf(buf, "\"%s\" is not a valid folder", path);
+		IupSetAttribute(export, "ACTIVE", "NO");
 	}
 	else
 	{
@@ -56,7 +102,7 @@ static int _set_status(Ihandle* ih)
 		if(!pos || *(pos+1) != 'd')
 		{
 			sprintf(buf, "The format \"%s\" is invalid as it does not contain a %%d", format);
-			IupSetAttribute(export, active, no);
+			IupSetAttribute(export, "ACTIVE", "NO");
 		}
 		else
 		{
@@ -65,12 +111,11 @@ static int _set_status(Ihandle* ih)
 			sprintf(start_file, format, from);
 			sprintf(end_file, format, from+nOfImages-1);
 			sprintf(buf, "Maps will be saved to %s"PATHSEP"%s through %s"PATHSEP"%s", path, start_file, path, end_file);
-			IupSetAttribute(export, active, yes);
+			IupSetAttribute(export, "ACTIVE", "YES");
 		}
 	}
 
 	IupSetAttribute(result, "VALUE", buf);
-
 	return IUP_DEFAULT;
 }
 
@@ -84,11 +129,11 @@ static int _browse_folder(Ihandle* ih)
 		IupSetAttribute(dir, "VALUE", IupGetAttribute(derp, "VALUE"));
 
 	IupDestroy(derp);
-	_set_status(ih);
+	IupGetCallback(dir, "VALUECHANGED_CB")(ih);
 	return IUP_DEFAULT;
 }
 
-char _setup_dialog()
+char _setup_dialog(void* status_callback)
 {
 	//Make sure an image is selected
 	ll = main_window_get_images_if_populated();
@@ -102,7 +147,7 @@ char _setup_dialog()
 	dir = IupText(NULL);
 	IupSetAttribute(dir, "VALUE", "");
 	IupSetAttributes(dir, "EXPAND=HORIZONTAL, NC=1024");
-	IupSetCallback(dir, "VALUECHANGED_CB", (Icallback)_set_status);
+	IupSetCallback(dir, "VALUECHANGED_CB", (Icallback)status_callback);
 
 	//Browse button
 	button_browse = IupButton("...", NULL);
@@ -112,13 +157,13 @@ char _setup_dialog()
 	frmt = IupText(NULL);
 	IupSetAttribute(frmt, "VALUE", "map_%d.dat");
 	IupSetAttributes(frmt, "VISIBLECOLUMNS=10, NC=128");
-	IupSetCallback(frmt, "VALUECHANGED_CB", (Icallback)_set_status);
+	IupSetCallback(frmt, "VALUECHANGED_CB", (Icallback)status_callback);
 
 	//Counter start textbox
 	count = IupText(NULL);
 	IupSetAttribute(count, "SPIN", "YES");
 	IupSetInt(count, "SPINMAX", INT_MAX);
-	IupSetCallback(count, "VALUECHANGED_CB", (Icallback)_set_status);
+	IupSetCallback(count, "VALUECHANGED_CB", (Icallback)status_callback);
 
 	//Result textbox
 	result = IupText(NULL);
@@ -137,7 +182,7 @@ char _setup_dialog()
 
 int export_dialog_world(Ihandle* ih)
 {
-	if(!_setup_dialog())
+	if(!_setup_dialog(_set_status_for_world))
 		return IUP_DEFAULT;
 
 	IupSetAttribute(frmt, "ACTIVE", "NO");
@@ -169,10 +214,10 @@ int export_dialog_world(Ihandle* ih)
 					),
 					NULL
 			)
-	), "TITLE=\"Export as Matrix\", DIALOGFRAME=YES, HIDETASKBAR=YES");
+	), "TITLE=\"Export to World\", DIALOGFRAME=YES, HIDETASKBAR=YES");
 	IupSetAttributeHandle(dlg, "DEFAULTESC", cancel);
 
-	_set_status(NULL);
+	_set_status_for_world(NULL);
 	IupPopup(dlg, IUP_CURRENT, IUP_CURRENT);
 
 	IupDestroy(dlg);
@@ -181,7 +226,7 @@ int export_dialog_world(Ihandle* ih)
 
 int export_dialog_folder(Ihandle* ih)
 {
-	if(!_setup_dialog())
+	if(!_setup_dialog(_set_status_for_dir))
 		return IUP_DEFAULT;
 
 	dlg = IupSetAttributes(IupDialog(
@@ -213,7 +258,7 @@ int export_dialog_folder(Ihandle* ih)
 	), "TITLE=\"Export as Matrix\", DIALOGFRAME=YES, HIDETASKBAR=YES");
 	IupSetAttributeHandle(dlg, "DEFAULTESC", cancel);
 
-	_set_status(NULL);
+	_set_status_for_dir(NULL);
 	IupPopup(dlg, IUP_CURRENT, IUP_CURRENT);
 
 	IupDestroy(dlg);

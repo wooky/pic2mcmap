@@ -11,7 +11,7 @@ Ihandle* win = NULL;
 static void _on_crash()
 {
 	int res = IupAlarm("Pic2MCMap has Crashed!", "Unfortunately, the program has crashed.\nIf this is the first time you see this message, trying repeating the same steps you made to get this "
-			"message.\nIf this message reappears, please submit an issue to the project's GitHub page.\n\nThe program will not close.", "Open GitHub Page", "Exit", NULL);
+			"message.\nIf this message reappears, please submit an issue to the project's GitHub page.\n\nThe program will now close.", "Open GitHub Page", "Exit", NULL);
 	if(res == 1)
 		IupHelp("https://github.com/wooky/pic2mcmap/issues");
 
