@@ -7,6 +7,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <limits.h>
 
 #define LL_APPEND INT_MAX
 

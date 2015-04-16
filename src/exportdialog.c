@@ -135,9 +135,9 @@ static int _set_status_for_dir(Ihandle* ih)
 
 		//Ensure that the format is in a proper format, i.e. has a %d
 		char* pos = strstr(format, "%");
-		if(!pos || *(pos+1) != 'd')
+		if(!pos || *(pos+1) != 'h' || *(pos+2) != 'u')
 		{
-			sprintf(buf, "The format \"%s\" is invalid as it does not contain a %%d", format);
+			sprintf(buf, "The format \"%s\" is invalid as it does not contain a %%hu", format);
 			IupSetAttribute(export, "ACTIVE", "NO");
 		}
 		else
@@ -192,14 +192,14 @@ char _setup_dialog(Icallback status_callback, Icallback export_callback)
 
 	//Format textbox
 	frmt = IupText(NULL);
-	IupSetAttribute(frmt, "VALUE", "map_%d.dat");
+	IupSetAttribute(frmt, "VALUE", "map_%hu.dat");
 	IupSetAttributes(frmt, "VISIBLECOLUMNS=10, NC=128");
 	IupSetCallback(frmt, "VALUECHANGED_CB", status_callback);
 
 	//Counter start textbox
 	count = IupText(NULL);
 	IupSetAttribute(count, "SPIN", "YES");
-	IupSetInt(count, "SPINMAX", INT_MAX);
+	IupSetInt(count, "SPINMAX", (unsigned short)-1);
 	IupSetCallback(count, "VALUECHANGED_CB", status_callback);
 
 	//Result textbox
@@ -236,7 +236,7 @@ int export_dialog_world(Ihandle* ih)
 					IupSetAttributes(IupHbox(
 							IupLabel("Save in the format "),
 							frmt,
-							IupLabel(" where %d starts at "),
+							IupLabel(" where %hu starts at "),
 							count,
 							NULL
 					), "ALIGNMENT=ACENTER"),
@@ -277,7 +277,7 @@ int export_dialog_folder(Ihandle* ih)
 					IupSetAttributes(IupHbox(
 							IupLabel("Save in the format "),
 							frmt,
-							IupLabel(" where %d starts at "),
+							IupLabel(" where %hu starts at "),
 							count,
 							NULL
 					), "ALIGNMENT=ACENTER"),

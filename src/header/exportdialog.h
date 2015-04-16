@@ -3,7 +3,6 @@
 
 #include "mainwindow.h"
 
-#include <limits.h>
 #include <sys/stat.h>
 
 int export_dialog_world(Ihandle*);
