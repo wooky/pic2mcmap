@@ -38,15 +38,31 @@ static int _do_export_to_world(Ihandle* ih)
 {
 	//Define the NBT to be written to idcounts.dat
 #define UNKNOWN 0
-	static unsigned char nbt_output[] = {
+#define NBT_OUT_SIZE 12
+	static unsigned char nbt_output[NBT_OUT_SIZE] = {
 			TAG_COMPOUND, 0, 0,									//root tag, unnamed
 				TAG_SHORT, 0, 3, 'm', 'a', 'p', UNKNOWN, UNKNOWN,	//current map count - unknown at this time
 			TAG_INVALID											//END root tag
 	};
 
 	//Set the last map number to be written
+	nbt_output[9] = (to>>8) & 0xff;
+	nbt_output[10] = to & 0xff;
 
+	//Write the NBT to idcounts.dat
+	sprintf(buf, "%s"PATHSEP"data"PATHSEP"idcounts.dat", IupGetAttribute(dir, "VALUE"));
+	FILE *idcounts = fopen(buf, "wb");
+	if(idcounts == NULL)
+	{
+		show_warning("File Access Failure", "Could not write to the idcounts.dat file. Make sure you have writing permission and that it's not used by another program.");
+		return IUP_DEFAULT;
+	}
+	fwrite(nbt_output, sizeof(unsigned char), NBT_OUT_SIZE, idcounts);
+	fclose(idcounts);
 
+	//Now dump the images into the data directory
+	sprintf(buf, "%s"PATHSEP"data", IupGetAttribute(dir, "VALUE"));
+	IupSetAttribute(dir, "VALUE", buf);
 	return _do_export(ih);
 }
 
@@ -66,9 +82,9 @@ static int _set_status_for_world(Ihandle* ih)
 	}
 	else
 	{
-		char dir[2048];
-		sprintf(dir, "%s"PATHSEP"data", path);
-		if(!_is_directory(dir))
+		char data[2048];
+		sprintf(data, "%s"PATHSEP"data", path);
+		if(!_is_directory(data))
 		{
 			sprintf(buf, "\"%s\" does not appear to be a valid Minecraft save directory", path);
 			IupSetAttribute(export, "ACTIVE", "NO");
@@ -76,7 +92,7 @@ static int _set_status_for_world(Ihandle* ih)
 		else
 		{
 			//Open idcounts.dat, if it exists, and determine the ID from which to start counting
-			sprintf(buf, "%s"PATHSEP"idcounts.dat", dir);
+			sprintf(buf, "%s"PATHSEP"idcounts.dat", data);
 			from = 0;
 			FILE *idcounts = fopen(buf, "rb");
 			if(idcounts != NULL) {
@@ -96,7 +112,7 @@ static int _set_status_for_world(Ihandle* ih)
 
 			IupSetInt(count, "SPINVALUE", (int)from);
 			to = from + nOfImages - 1;
-			sprintf(buf, "Maps will be saved to %s"PATHSEP"map_%hi.dat through %s"PATHSEP"map_%hi.dat", dir, from, dir, to);
+			sprintf(buf, "Maps will be saved to %s"PATHSEP"map_%hi.dat through %s"PATHSEP"map_%hi.dat", data, from, data, to);
 			IupSetAttribute(export, "ACTIVE", "YES");
 		}
 	}
