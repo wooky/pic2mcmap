@@ -1,0 +1,3 @@
+[submodule "cNBT"]
+	path = cNBT
+	url = git@github.com:FliPPeh/cNBT.git
