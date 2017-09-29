@@ -1,5 +1,4 @@
 .*
 !*.gitignore
-Debug
-Release
 cNBT-master
+bin
