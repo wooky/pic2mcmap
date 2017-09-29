@@ -1,5 +1,5 @@
 //Oh joy it's a C++ file in a C project. Nothing could possibly go wrong here
-#include "header/datformat.hpp"
+#include "datformat.hpp"
 
 #include <im_format.h>	//Can't shove this into the .hpp file here
 

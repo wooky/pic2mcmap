@@ -1,4 +1,4 @@
-#include "header/imageutil.h"
+#include "imageutil.h"
 
 //Put these into the Options dialog, not hard-coded
 #define RESIZE_ORDER 0

@@ -1,4 +1,4 @@
-#include "header/imageio.h"
+#include "imageio.h"
 
 //Put these into the Options dialog, not hard-coded
 #define RESIZE_ORDER 0

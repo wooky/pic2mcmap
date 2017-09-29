@@ -1,4 +1,4 @@
-#include "header/statusbar.h"
+#include "statusbar.h"
 
 static char done = 1;
 

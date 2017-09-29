@@ -1,4 +1,4 @@
-#include "header/linkedlist.h"
+#include "linkedlist.h"
 
 //Throw an error
 static void _throw_error(int i, int index)

@@ -1,4 +1,4 @@
-#include "header/mainwindow.h"
+#include "mainwindow.h"
 
 #define SEPARATOR (char*)1
 

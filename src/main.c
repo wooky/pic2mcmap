@@ -1,5 +1,5 @@
-#include "header/mainwindow.h"
-#include "header/datformat.hpp"
+#include "mainwindow.h"
+#include "datformat.hpp"
 
 #include <iup.h>
 #include <stdio.h>

@@ -8,7 +8,7 @@
  * Here it goes!
  */
 
-#include "header/nbttemplate.h"
+#include "nbttemplate.h"
 
 #define NBT_SIZE_COMPOUND(x) 3+(x)
 #define NBT_SIZE_BYTE(x) 4+(x)

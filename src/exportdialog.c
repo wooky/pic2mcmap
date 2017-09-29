@@ -1,4 +1,4 @@
-#include "header/exportdialog.h"
+#include "exportdialog.h"
 
 static Ihandle *dir, *frmt, *result, *count, *export, *dlg, *button_browse, *cancel;
 static LinkedList* ll;

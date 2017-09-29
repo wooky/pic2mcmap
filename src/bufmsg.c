@@ -1,4 +1,4 @@
-#include "header/bufmsg.h"
+#include "bufmsg.h"
 
 static char done = 1, triggered = 0;
 static char *ttl, *buf;
